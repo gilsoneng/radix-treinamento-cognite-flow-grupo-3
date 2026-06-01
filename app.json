@@ -1,0 +1,17 @@
+{
+  "name": "XPTO",
+  "description": "Cognite Flow Training Demo Group 3",
+  "externalId": "xpto-app",
+  "versionTag": "0.0.1",
+  "infra": "appsApi",
+  "deployments": [
+    {
+      "org": "radix",
+      "project": "radix-dev",
+      "baseUrl": "https://az-eastus-1.cognitedata.com",
+      "published": false,
+      "deployClientId": "",
+      "deploySecretName": "RADIX_RADIX_DEV_AZ_EASTUS_1"
+    }
+  ]
+}
