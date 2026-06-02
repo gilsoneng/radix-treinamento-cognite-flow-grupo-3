@@ -1,4 +1,5 @@
 @import '@cognite/aura/styles.source.css';
+@import './brand-theme.css';
 
 @source '../node_modules/@cognite/aura/dist/components';
 

@@ -1,0 +1,401 @@
+/**
+ * International Paper — brand theme overrides for Cognite Aura
+ *
+ * Source of truth: specs/design.md
+ * Paleta mapeada para tokens Aura (colors.css) em formato rgb().
+ *
+ * Dark mode: tokens em `.dark` aplicam via prefers-color-scheme: dark e/ou
+ * classe `.dark` no ancestral (ex.: <html class="dark">).
+ */
+
+/* =============================================================================
+   Camada 1 — Referência de marca (HEX documentado; não usar direto em componentes)
+   ============================================================================= */
+
+:root {
+  --brand-primary: #006963;
+  --brand-secondary: #00ab5f;
+  --brand-info: #61c4db;
+  --brand-warning: #fcbd44;
+  --brand-accent-earth: #624c3b;
+  --brand-accent-light: #aed49a;
+  --brand-text: #15191e;
+  --brand-surface-subtle: #f1f3f5;
+  --brand-surface-base: #ffffff;
+
+  /* ---------------------------------------------------------------------------
+     Camada 2a — Ramps base (pontos-chave alinhados à paleta)
+     --------------------------------------------------------------------------- */
+
+  /* Neutros — Near-Black, Light Gray, White */
+  --mountain-black: rgb(21, 25, 30);
+  --mountain-950: rgb(21, 25, 30);
+  --mountain-900: rgb(33, 36, 38);
+  --mountain-800: rgb(45, 49, 52);
+  --mountain-700: rgb(64, 70, 74);
+  --mountain-650: rgb(82, 89, 95);
+  --mountain-600: rgb(94, 102, 109);
+  --mountain-550: rgb(109, 118, 126);
+  --mountain-500: rgb(124, 134, 142);
+  --mountain-450: rgb(139, 148, 154);
+  --mountain-400: rgb(165, 171, 177);
+  --mountain-300: rgb(187, 192, 196);
+  --mountain-200: rgb(212, 215, 217);
+  --mountain-100: rgb(228, 230, 232);
+  --mountain-50: rgb(241, 243, 245);
+  --mountain-10: rgb(249, 250, 250);
+  --mountain-white: rgb(255, 255, 255);
+
+  /* Primário — International Paper Green */
+  --nordic-50: rgb(230, 245, 243);
+  --nordic-100: rgb(180, 230, 225);
+  --nordic-200: rgb(127, 210, 200);
+  --nordic-300: rgb(51, 180, 165);
+  --nordic-400: rgb(0, 135, 125);
+  --nordic-450: rgb(0, 105, 99);
+  --nordic-500: rgb(0, 90, 85);
+  --nordic-550: rgb(0, 80, 75);
+  --nordic-600: rgb(0, 70, 66);
+  --nordic-650: rgb(0, 61, 57);
+  --nordic-700: rgb(0, 48, 45);
+  --nordic-800: rgb(0, 34, 32);
+  --nordic-900: rgb(0, 25, 24);
+  --nordic-950: rgb(0, 13, 12);
+
+  /* Secundário / success — Clover Green */
+  --green-50: rgb(221, 249, 235);
+  --green-100: rgb(187, 243, 208);
+  --green-200: rgb(139, 234, 174);
+  --green-300: rgb(52, 218, 130);
+  --green-400: rgb(0, 171, 95);
+  --green-450: rgb(0, 150, 83);
+  --green-500: rgb(0, 130, 72);
+  --green-550: rgb(0, 115, 64);
+  --green-600: rgb(0, 100, 56);
+  --green-650: rgb(0, 87, 49);
+  --green-700: rgb(0, 68, 38);
+  --green-800: rgb(0, 48, 27);
+  --green-900: rgb(0, 36, 20);
+  --green-950: rgb(0, 19, 11);
+
+  /* Warning — Amber / Yellow */
+  --amber-50: rgb(255, 244, 220);
+  --amber-100: rgb(252, 230, 180);
+  --amber-200: rgb(252, 210, 120);
+  --amber-300: rgb(252, 189, 68);
+  --amber-400: rgb(225, 170, 60);
+  --amber-450: rgb(193, 145, 52);
+  --amber-500: rgb(175, 130, 45);
+  --amber-550: rgb(155, 115, 40);
+  --amber-600: rgb(134, 100, 35);
+  --amber-650: rgb(117, 87, 30);
+  --amber-700: rgb(91, 68, 24);
+  --amber-800: rgb(65, 48, 17);
+  --amber-900: rgb(48, 36, 13);
+  --amber-950: rgb(24, 18, 7);
+
+  /* Info — Sky Blue */
+  --sky-50: rgb(230, 247, 252);
+  --sky-100: rgb(200, 238, 248);
+  --sky-200: rgb(150, 220, 240);
+  --sky-300: rgb(97, 196, 219);
+  --sky-400: rgb(70, 175, 200);
+  --sky-450: rgb(50, 155, 180);
+  --sky-500: rgb(35, 140, 165);
+  --sky-550: rgb(28, 125, 148);
+  --sky-600: rgb(22, 108, 128);
+  --sky-650: rgb(18, 94, 112);
+  --sky-700: rgb(14, 75, 90);
+  --sky-800: rgb(10, 54, 65);
+  --sky-900: rgb(7, 40, 48);
+  --sky-950: rgb(4, 21, 26);
+
+  /* ---------------------------------------------------------------------------
+     Camada 2b — Tokens semânticos (light)
+     --------------------------------------------------------------------------- */
+
+  --background: rgb(241, 243, 245);
+  --background-fixed-dark: var(--mountain-900);
+  --background-fixed-light: rgb(255, 255, 255);
+  --foreground: rgb(21, 25, 30);
+  --foreground-fixed-dark: rgb(21, 25, 30);
+  --foreground-fixed-light: rgb(255, 255, 255);
+
+  --card-background: rgb(255, 255, 255);
+  --popover-background: rgb(255, 255, 255);
+  --alternate-background: rgb(249, 250, 250);
+
+  --muted-background: rgb(241, 243, 245);
+  --muted-foreground: rgb(109, 118, 126);
+  --muted-foreground-fixed-light: rgb(165, 171, 177);
+
+  --border: rgb(228, 230, 232);
+  --border-emphasized: rgb(212, 215, 217);
+  --border-active: rgb(21, 25, 30);
+  --border-on-dark: rgb(45, 49, 52);
+
+  /* Par seguro: #006963 + #FFFFFF — botões primários, headers */
+  --primary-background: rgb(0, 105, 99);
+  --primary-background-hover: rgb(0, 80, 75);
+  --foreground-on-primary: rgb(255, 255, 255);
+
+  --secondary-background: rgb(221, 249, 235);
+  --secondary-background-hover: rgb(187, 243, 208);
+  /* A11y: não usar Clover (#00AB5F) em labels pequenos sobre branco; usar Near-Black */
+  --secondary-foreground: rgb(21, 25, 30);
+  --secondary-foreground-fixed-light: rgb(187, 243, 208);
+
+  --accent-background: rgb(241, 243, 245);
+  --accent-background-strong: rgb(228, 230, 232);
+  --accent-background-fixed-dark: rgb(45, 49, 52);
+
+  --active-background: rgb(21, 25, 30);
+  --active-background-hover: rgb(45, 49, 52);
+  --active-foreground: rgb(21, 25, 30);
+  --foreground-on-active: rgb(241, 243, 245);
+
+  --highlight-background: rgb(241, 243, 245);
+  --highlight-background-strong: rgb(228, 230, 232);
+  --inactive-foreground: rgb(139, 148, 154);
+
+  /* Success — Clover Green (fills/ícones; texto pequeno → --foreground) */
+  --success-background: rgb(187, 243, 208);
+  --success-background-hover: rgb(139, 234, 174);
+  --success-foreground: rgb(0, 171, 95);
+  --success-foreground-on-success: rgb(0, 68, 38);
+  --success-muted-background: rgb(221, 249, 235);
+
+  /* Warning — Amber; par seguro com Near-Black em faixas */
+  --warning-background: rgb(252, 230, 180);
+  --warning-background-hover: rgb(252, 210, 120);
+  --warning-foreground: rgb(193, 145, 52);
+  --warning-foreground-on-warning: rgb(21, 25, 30);
+  --warning-muted-background: rgb(255, 244, 220);
+
+  /* Info — Sky Blue; par seguro #61C4DB + #15191E em callouts */
+  --info-background: rgb(200, 238, 248);
+  --info-background-hover: rgb(150, 220, 240);
+  --info-foreground: rgb(14, 75, 90);
+  --info-foreground-on-info: rgb(21, 25, 30);
+  --info-muted-background: rgb(230, 247, 252);
+
+  --link-foreground: rgb(0, 105, 99);
+  --ring: rgb(0, 105, 99);
+  --ring-muted: rgb(180, 230, 225);
+
+  --neutral-background: rgb(228, 230, 232);
+  --neutral-background-hover: rgb(212, 215, 217);
+  --neutral-foreground: rgb(82, 89, 95);
+  --neutral-foreground-on-neutral: rgb(64, 70, 74);
+  --neutral-muted-background: rgb(241, 243, 245);
+
+  --disabled-background: rgb(241, 243, 245);
+  --disabled-foreground: rgb(165, 171, 177);
+
+  --raised-background: rgb(45, 49, 52);
+  --background-hover: rgb(180, 230, 225);
+
+  /* Decorativos — Badge mountain / nordic */
+  --decorative-mountain-background: rgb(228, 230, 232);
+  --decorative-mountain-background-hover: rgb(212, 215, 217);
+  --decorative-mountain-foreground: rgb(64, 70, 74);
+
+  --decorative-nordic-background: rgb(180, 230, 225);
+  --decorative-nordic-background-hover: rgb(127, 210, 200);
+  --decorative-nordic-foreground: rgb(0, 48, 45);
+
+  --decorative-sky-background: rgb(200, 238, 248);
+  --decorative-sky-background-hover: rgb(150, 220, 240);
+  --decorative-sky-foreground: rgb(14, 75, 90);
+
+  /* Charts — Tier 1–3 accents (design.md) */
+  --chart-nordic-solid: rgb(0, 105, 99);
+  --chart-nordic-opacity-1: rgba(0, 105, 99, 0.8);
+  --chart-nordic-opacity-2: rgba(0, 105, 99, 0.65);
+  --chart-nordic-opacity-3: rgba(0, 105, 99, 0.5);
+  --chart-nordic-opacity-4: rgba(0, 105, 99, 0.35);
+  --chart-nordic-opacity-5: rgba(0, 105, 99, 0.2);
+
+  --chart-aurora-solid: rgb(0, 171, 95);
+  --chart-aurora-opacity-1: rgba(0, 171, 95, 0.8);
+  --chart-aurora-opacity-2: rgba(0, 171, 95, 0.65);
+  --chart-aurora-opacity-3: rgba(0, 171, 95, 0.5);
+  --chart-aurora-opacity-4: rgba(0, 171, 95, 0.35);
+  --chart-aurora-opacity-5: rgba(0, 171, 95, 0.2);
+
+  --chart-fjord-solid: rgb(97, 196, 219);
+  --chart-fjord-opacity-1: rgba(97, 196, 219, 0.8);
+  --chart-fjord-opacity-2: rgba(97, 196, 219, 0.65);
+  --chart-fjord-opacity-3: rgba(97, 196, 219, 0.5);
+  --chart-fjord-opacity-4: rgba(97, 196, 219, 0.35);
+  --chart-fjord-opacity-5: rgba(97, 196, 219, 0.2);
+
+  --chart-orange-solid: rgb(252, 189, 68);
+  --chart-orange-opacity-1: rgba(252, 189, 68, 0.8);
+  --chart-orange-opacity-2: rgba(252, 189, 68, 0.65);
+  --chart-orange-opacity-3: rgba(252, 189, 68, 0.5);
+  --chart-orange-opacity-4: rgba(252, 189, 68, 0.35);
+  --chart-orange-opacity-5: rgba(252, 189, 68, 0.2);
+
+  /* Brown (Tier 3 earthy accent) — série dusk */
+  --chart-dusk-solid: rgb(98, 76, 59);
+  --chart-dusk-opacity-1: rgba(98, 76, 59, 0.8);
+  --chart-dusk-opacity-2: rgba(98, 76, 59, 0.65);
+  --chart-dusk-opacity-3: rgba(98, 76, 59, 0.5);
+  --chart-dusk-opacity-4: rgba(98, 76, 59, 0.35);
+  --chart-dusk-opacity-5: rgba(98, 76, 59, 0.2);
+
+  --chart-gridlines: rgb(228, 230, 232);
+
+  /* A11y: Sage (#AED49A) e Sky — fundos decorativos; texto pequeno → Near-Black */
+  --decorative-aurora-background: rgb(174, 212, 154);
+  --decorative-aurora-background-hover: rgb(200, 225, 185);
+  --decorative-aurora-foreground: rgb(21, 25, 30);
+}
+
+/* =============================================================================
+   Dark mode — Near-Black como base
+   Par seguro: #15191E + texto claro; primary #006963 + #FFFFFF
+   ============================================================================= */
+
+.dark {
+  --mountain-black: rgb(21, 25, 30);
+  --mountain-950: rgb(21, 25, 30);
+  --mountain-900: rgb(33, 36, 38);
+  --mountain-800: rgb(45, 49, 52);
+  --mountain-700: rgb(64, 70, 74);
+  --mountain-50: rgb(241, 243, 245);
+  --mountain-10: rgb(249, 250, 250);
+
+  --nordic-450: rgb(0, 120, 112);
+  --nordic-400: rgb(0, 135, 125);
+
+  --background: rgb(21, 25, 30);
+  --background-fixed-dark: rgb(33, 36, 38);
+  --background-fixed-light: rgb(255, 255, 255);
+  --foreground: rgb(241, 243, 245);
+  --foreground-fixed-dark: rgb(21, 25, 30);
+  --foreground-fixed-light: rgb(255, 255, 255);
+
+  --card-background: rgb(33, 36, 38);
+  --popover-background: rgb(33, 36, 38);
+  --alternate-background: rgb(21, 25, 30);
+
+  --muted-background: rgb(45, 49, 52);
+  --muted-foreground: rgb(165, 171, 177);
+  --muted-foreground-fixed-light: rgb(109, 118, 126);
+
+  --border: rgb(45, 49, 52);
+  --border-emphasized: rgb(64, 70, 74);
+  --border-active: rgb(249, 250, 250);
+  --border-on-dark: rgb(45, 49, 52);
+
+  --primary-background: rgb(0, 105, 99);
+  --primary-background-hover: rgb(0, 135, 125);
+  --foreground-on-primary: rgb(255, 255, 255);
+
+  --secondary-background: rgb(45, 49, 52);
+  --secondary-background-hover: rgb(64, 70, 74);
+  --secondary-foreground: rgb(187, 243, 208);
+  --secondary-foreground-fixed-light: rgb(187, 243, 208);
+
+  --accent-background: rgb(45, 49, 52);
+  --accent-background-strong: rgb(64, 70, 74);
+  --accent-background-fixed-dark: rgb(45, 49, 52);
+
+  --active-background: rgb(249, 250, 250);
+  --active-background-hover: rgb(241, 243, 245);
+  --active-foreground: rgb(241, 243, 245);
+  --foreground-on-active: rgb(21, 25, 30);
+
+  --highlight-background: rgb(45, 49, 52);
+  --highlight-background-strong: rgb(64, 70, 74);
+  --inactive-foreground: rgb(124, 134, 142);
+
+  --success-background: rgb(0, 100, 56);
+  --success-background-hover: rgb(0, 130, 72);
+  --success-foreground: rgb(139, 234, 174);
+  --success-foreground-on-success: rgb(187, 243, 208);
+  --success-muted-background: rgb(45, 49, 52);
+
+  --warning-background: rgb(91, 68, 24);
+  --warning-background-hover: rgb(117, 87, 30);
+  --warning-foreground: rgb(252, 189, 68);
+  --warning-foreground-on-warning: rgb(255, 244, 220);
+  --warning-muted-background: rgb(45, 49, 52);
+
+  --info-background: rgb(18, 94, 112);
+  --info-background-hover: rgb(28, 125, 148);
+  --info-foreground: rgb(150, 220, 240);
+  --info-foreground-on-info: rgb(230, 247, 252);
+  --info-muted-background: rgb(45, 49, 52);
+
+  --link-foreground: rgb(127, 210, 200);
+  --ring: rgb(0, 135, 125);
+  --ring-muted: rgb(0, 70, 66);
+
+  --neutral-background: rgb(187, 243, 208);
+  --neutral-background-hover: rgb(241, 243, 245);
+  --neutral-foreground: rgb(165, 171, 177);
+  --neutral-foreground-on-neutral: rgb(45, 49, 52);
+  --neutral-muted-background: rgb(45, 49, 52);
+
+  --disabled-background: rgb(45, 49, 52);
+  --disabled-foreground: rgb(94, 102, 109);
+
+  --raised-background: rgb(64, 70, 74);
+  --background-hover: rgb(0, 48, 45);
+
+  --decorative-mountain-background: rgb(64, 70, 74);
+  --decorative-mountain-background-hover: rgb(82, 89, 95);
+  --decorative-mountain-foreground: rgb(212, 215, 217);
+
+  --decorative-nordic-background: rgb(0, 48, 45);
+  --decorative-nordic-background-hover: rgb(0, 70, 66);
+  --decorative-nordic-foreground: rgb(180, 230, 225);
+
+  --decorative-sky-background: rgb(18, 94, 112);
+  --decorative-sky-background-hover: rgb(28, 125, 148);
+  --decorative-sky-foreground: rgb(200, 238, 248);
+
+  --chart-nordic-solid: rgb(0, 135, 125);
+  --chart-nordic-opacity-1: rgba(0, 135, 125, 0.8);
+  --chart-nordic-opacity-2: rgba(0, 135, 125, 0.65);
+  --chart-nordic-opacity-3: rgba(0, 135, 125, 0.5);
+  --chart-nordic-opacity-4: rgba(0, 135, 125, 0.35);
+  --chart-nordic-opacity-5: rgba(0, 135, 125, 0.2);
+
+  --chart-aurora-solid: rgb(0, 171, 95);
+  --chart-aurora-opacity-1: rgba(0, 171, 95, 0.8);
+  --chart-aurora-opacity-2: rgba(0, 171, 95, 0.65);
+  --chart-aurora-opacity-3: rgba(0, 171, 95, 0.5);
+  --chart-aurora-opacity-4: rgba(0, 171, 95, 0.35);
+  --chart-aurora-opacity-5: rgba(0, 171, 95, 0.2);
+
+  --chart-fjord-solid: rgb(97, 196, 219);
+  --chart-fjord-opacity-1: rgba(97, 196, 219, 0.8);
+  --chart-fjord-opacity-2: rgba(97, 196, 219, 0.65);
+  --chart-fjord-opacity-3: rgba(97, 196, 219, 0.5);
+  --chart-fjord-opacity-4: rgba(97, 196, 219, 0.35);
+  --chart-fjord-opacity-5: rgba(97, 196, 219, 0.2);
+
+  --chart-orange-solid: rgb(252, 189, 68);
+  --chart-orange-opacity-1: rgba(252, 189, 68, 0.8);
+  --chart-orange-opacity-2: rgba(252, 189, 68, 0.65);
+  --chart-orange-opacity-3: rgba(252, 189, 68, 0.5);
+  --chart-orange-opacity-4: rgba(252, 189, 68, 0.35);
+  --chart-orange-opacity-5: rgba(252, 189, 68, 0.2);
+
+  --chart-dusk-solid: rgb(139, 120, 105);
+  --chart-dusk-opacity-1: rgba(139, 120, 105, 0.8);
+  --chart-dusk-opacity-2: rgba(139, 120, 105, 0.65);
+  --chart-dusk-opacity-3: rgba(139, 120, 105, 0.5);
+  --chart-dusk-opacity-4: rgba(139, 120, 105, 0.35);
+  --chart-dusk-opacity-5: rgba(139, 120, 105, 0.2);
+
+  --chart-gridlines: rgb(45, 49, 52);
+
+  --decorative-aurora-background: rgb(60, 90, 50);
+  --decorative-aurora-background-hover: rgb(80, 115, 68);
+  --decorative-aurora-foreground: rgb(174, 212, 154);
+}
