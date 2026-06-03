@@ -20,12 +20,14 @@
     "lint:fix": "eslint . --fix --ext .js,.mjs,.cjs,.ts,.tsx",
     "deploy": "npx @cognite/cli@latest apps deploy --interactive",
     "activate": "npx @cognite/cli@latest apps activate --interactive",
-    "setup-https": "npx @cognite/cli@latest apps setup-https"
+    "setup-https": "npx @cognite/cli@latest apps setup-https",
+    "sync-mcp-env": "powershell -ExecutionPolicy Bypass -File scripts/sync-mcp-env.ps1",
+    "seed:spreadsheet": "node scripts/json-seed-to-spreadsheet.mjs"
   },
   "dependencies": {
+    "@cognite/app-sdk": "^0.5.1",
     "@cognite/aura": "^0.1.7",
     "@cognite/sdk": "^10.3.0",
-    "@cognite/app-sdk": "^0.5.1",
     "@tabler/icons-react": "^3.35.0",
     "@tanstack/react-query": "^5.90.10",
     "clsx": "^2.1.1",
@@ -58,6 +60,7 @@
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.46.4",
     "vite": "7.3.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "xlsx": "^0.18.5"
   }
 }

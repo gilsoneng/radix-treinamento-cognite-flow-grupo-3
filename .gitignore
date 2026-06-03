@@ -13,7 +13,9 @@ certificates
 
 # Environment variables
 .env
-.env.local
+.env.*
+*.key
+*.pem
 
 # Editor directories
 .vscode
