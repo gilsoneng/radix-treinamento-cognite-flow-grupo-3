@@ -17,6 +17,7 @@ export default defineConfig({
       exclude: [
         '**/*.test.{ts,tsx}',
         '**/__fixtures__/**',
+        '**/__mocks__/**',
         '**/*.d.ts',
         'src/main.tsx', // bootstrap (exceção §6)
         // Arquivos somente-tipo (interfaces/entidades): sem código executável a cobrir.
