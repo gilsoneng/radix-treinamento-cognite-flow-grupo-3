@@ -76,7 +76,6 @@
 
 - Suporte **somente desktop** no v1 (gerente trabalha em escritório); responsividade mobile fora de escopo.
 - App **somente leitura**: nenhuma escrita no CDF.
-- Instâncias de checklist no space **`APMAppData`** (mesmo do data model). *(Resposta do usuário.)*
 - Autenticação, cluster e projeto resolvidos pelo `@cognite/app-sdk`; nada hardcoded.
 - UI em **português (pt-BR)** e horário local da planta.
 - "Tempo real" é atendido por **polling de ~30s** (não streaming/websocket).
