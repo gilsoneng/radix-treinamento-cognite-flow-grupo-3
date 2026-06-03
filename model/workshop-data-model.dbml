@@ -1,0 +1,173 @@
+// =============================================================================
+// Treinamento Cognite Flows — ApmAppData (cdf_apm)
+// =============================================================================
+// Space: cdf_apm  |  Data model: ApmAppData  (system)
+// LEIA: model/CDM-REFERENCES.md
+//
+// Abrir: https://dbdiagram.io/d → Import
+//
+// Versões das views: confirmar no CDF (podem diferir de v7/v8 abaixo)
+// Assets: rootLocation / asset → espelham CogniteAsset (cdf_cdm) no projeto
+// =============================================================================
+
+Project apm_app_data_training {
+  database_type: 'PostgreSQL'
+  Note: '''
+    MODELO DO TREINAMENTO: cdf_apm / ApmAppData
+    Não criar FlowTraining* custom para checklist — reutilizar views APM.
+    Seed: Template → TemplateItem → Checklist → ChecklistItem → MeasurementReading / Observation
+  '''
+}
+
+// -----------------------------------------------------------------------------
+// Referência externa — hierarquia industrial (typical: cdf_cdm.CogniteAsset v1)
+// -----------------------------------------------------------------------------
+
+Table cognite_asset [note: 'cdf_cdm.CogniteAsset — referência via asset / rootLocation'] {
+  external_id varchar [pk]
+  name varchar [not null]
+  parent_external_id varchar [null, ref: > cognite_asset.external_id]
+  path varchar [null, note: 'ancestor chain — CDM auto']
+}
+
+Table cognite_time_series [note: 'cdf_cdm.CogniteTimeSeries — trends (datapoints API)'] {
+  external_id varchar [pk]
+  name varchar [not null]
+  type varchar [note: 'numeric | string | state']
+  asset_external_id varchar [null, note: 'assets[] list in CDM']
+}
+
+// -----------------------------------------------------------------------------
+// cdf_apm — ApmAppData (views do treinamento)
+// -----------------------------------------------------------------------------
+
+Table apm_template [note: 'cdf_apm.Template'] {
+  external_id varchar [pk]
+  name varchar [null]
+  root_location_external_id varchar [null, ref: > cognite_asset.external_id, note: 'rootLocation']
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+}
+
+Table apm_template_item [note: 'cdf_apm.TemplateItem'] {
+  external_id varchar [pk]
+  name varchar [null]
+  template_external_id varchar [null, note: 'via edge referenceTemplateItems']
+  asset_external_id varchar [null, ref: > cognite_asset.external_id, note: 'asset']
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+}
+
+Table apm_schedule [note: 'cdf_apm.Schedule'] {
+  external_id varchar [pk]
+  name varchar [null]
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+}
+
+Table apm_checklist [note: 'cdf_apm.Checklist — inspeção executada'] {
+  external_id varchar [pk]
+  name varchar [null]
+  root_location_external_id varchar [null, ref: > cognite_asset.external_id, note: 'rootLocation']
+  status varchar [null, note: 'confirmar enum no projeto']
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+  created_by varchar [null]
+  updated_by varchar [null]
+}
+
+Table apm_checklist_item [note: 'cdf_apm.ChecklistItem'] {
+  external_id varchar [pk]
+  name varchar [null]
+  checklist_external_id varchar [null, note: 'via edge referenceChecklistItems']
+  asset_external_id varchar [null, ref: > cognite_asset.external_id, note: 'asset']
+  status varchar [null, note: 'pass / fail / pending — confirmar no projeto']
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+}
+
+Table apm_measurement_reading [note: 'cdf_apm.MeasurementReading'] {
+  external_id varchar [pk]
+  name varchar [null]
+  value double [null]
+  unit varchar [null]
+  checklist_item_external_id varchar [null, note: 'via edge referenceMeasurements']
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+}
+
+Table apm_observation [note: 'cdf_apm.Observation — alertas / observações de campo'] {
+  external_id varchar [pk]
+  title varchar [null, note: 'mapeado de title/name no InField']
+  description varchar [null]
+  status varchar [null]
+  priority varchar [null]
+  type varchar [null]
+  asset_external_id varchar [null, ref: > cognite_asset.external_id]
+  root_location_external_id varchar [null, ref: > cognite_asset.external_id]
+  created_time timestamp [null]
+  last_updated_time timestamp [null]
+}
+
+Table apm_activity [note: 'cdf_apm.Activity v2 — opcional'] {
+  external_id varchar [pk]
+  name varchar [null]
+  asset_external_id varchar [null, ref: > cognite_asset.external_id]
+}
+
+// Lógica condicional de templates (opcional no workshop)
+Table apm_condition [note: 'cdf_apm.Condition v1'] {
+  external_id varchar [pk]
+}
+
+Table apm_action [note: 'cdf_apm.Action v1'] {
+  external_id varchar [pk]
+}
+
+Table apm_conditional_action [note: 'cdf_apm.ConditionalAction v1'] {
+  external_id varchar [pk]
+}
+
+// -----------------------------------------------------------------------------
+// Edges cdf_apm (tipos de aresta do ApmAppData)
+// -----------------------------------------------------------------------------
+
+Table edge_reference_template_items [note: 'cdf_apm.referenceTemplateItems'] {
+  external_id varchar [pk]
+  template_external_id varchar [not null, ref: > apm_template.external_id]
+  template_item_external_id varchar [not null, ref: > apm_template_item.external_id]
+}
+
+Table edge_reference_schedules [note: 'cdf_apm.referenceSchedules'] {
+  external_id varchar [pk]
+  template_external_id varchar [null, ref: > apm_template.external_id]
+  template_item_external_id varchar [null, ref: > apm_template_item.external_id]
+  schedule_external_id varchar [not null, ref: > apm_schedule.external_id]
+}
+
+Table edge_reference_checklist_items [note: 'cdf_apm.referenceChecklistItems — inwards on item'] {
+  external_id varchar [pk]
+  checklist_external_id varchar [not null, ref: > apm_checklist.external_id]
+  checklist_item_external_id varchar [not null, ref: > apm_checklist_item.external_id]
+}
+
+Table edge_reference_measurements [note: 'cdf_apm.referenceMeasurements — inwards on item'] {
+  external_id varchar [pk]
+  checklist_item_external_id varchar [not null, ref: > apm_checklist_item.external_id]
+  measurement_reading_external_id varchar [not null, ref: > apm_measurement_reading.external_id]
+}
+
+Table edge_reference_observations [note: 'cdf_apm.referenceObservations — outwards from item'] {
+  external_id varchar [pk]
+  checklist_item_external_id varchar [not null, ref: > apm_checklist_item.external_id]
+  observation_external_id varchar [not null, ref: > apm_observation.external_id]
+}
+
+// -----------------------------------------------------------------------------
+// Fluxo de negócio (resumo)
+// -----------------------------------------------------------------------------
+// Template ──referenceTemplateItems──> TemplateItem ──referenceSchedules──> Schedule
+// Checklist ──referenceChecklistItems──> ChecklistItem
+// ChecklistItem <──referenceMeasurements── MeasurementReading
+// ChecklistItem ──referenceObservations──> Observation
+// * ──asset / rootLocation──> CogniteAsset (cdf_cdm)
