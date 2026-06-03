@@ -9,16 +9,10 @@ import { Badge } from '@cognite/aura/components';
 
 import type { ItemStatusBucket } from '../../domain';
 import type { ChecklistItem, MeasurementReading } from '../../types/apm';
-
-type ItemStatusVariant = 'success' | 'error' | 'inProgress' | 'gray';
-
-interface StatusPresentation {
-  label: string;
-  variant: ItemStatusVariant;
-}
+import { ITEM_STATUS_PRESENTATION } from '../presentation/badge-presentations';
 
 export function ChecklistItemRow({ item, status }: { item: ChecklistItem; status: ItemStatusBucket }) {
-  const presentation = presentItemStatus(status);
+  const presentation = ITEM_STATUS_PRESENTATION[status];
   return (
     <li className="flex flex-col gap-1 border-b border-border py-3 last:border-0">
       <div className="flex items-start justify-between gap-3">
@@ -39,23 +33,6 @@ export function ChecklistItemRow({ item, status }: { item: ChecklistItem; status
       ) : null}
     </li>
   );
-}
-
-function presentItemStatus(status: ItemStatusBucket): StatusPresentation {
-  switch (status) {
-    case 'ok':
-      return { label: 'OK', variant: 'success' };
-    case 'not_ok':
-      return { label: 'Not OK', variant: 'error' };
-    case 'blocked':
-      return { label: 'Blocked', variant: 'error' };
-    case 'em_andamento':
-      return { label: 'Em andamento', variant: 'inProgress' };
-    case 'concluido':
-      return { label: 'Concluído', variant: 'success' };
-    case 'pendente':
-      return { label: 'Pendente', variant: 'gray' };
-  }
 }
 
 function formatMeasurement(measurement: MeasurementReading): string {

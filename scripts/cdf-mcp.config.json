@@ -1,0 +1,15 @@
+{
+  "dataModels": [
+    {
+      "space": "RadixSpace",
+      "externalId": "MaterialDOM",
+      "version": "v10"
+    },
+    {
+      "space": "GOA_WORK_MANAGEMENT",
+      "externalId": "GOA_WORK_MANAGEMENT",
+      "version": "v1"
+    }
+  ],
+  "instanceSpaces": ["RadixSpace", "GOA_WORK_MANAGEMENT"]
+}

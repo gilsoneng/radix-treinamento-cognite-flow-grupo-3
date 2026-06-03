@@ -7,9 +7,11 @@
 import { Alert, AlertDescription, AlertTitle, Card, CardContent, Loader } from '@cognite/aura/components';
 import { IconAlertTriangle, IconInbox } from '@tabler/icons-react';
 
+import { DashboardFeature } from '../../features/dashboard/dashboard-feature';
 import type { ActiveView } from '../state/app-state';
 
-import { ChecklistListSlot, DashboardSlot } from './feature-slot';
+
+import { ChecklistListSlot } from './feature-slot';
 import { toErrorMessage } from './to-error-message';
 
 export interface ShellContentProps {
@@ -58,9 +60,5 @@ export function ShellContent({ activeView, isLoading, isError, error, checklistC
     );
   }
 
-  return activeView === 'dashboard' ? (
-    <DashboardSlot checklistCount={checklistCount} />
-  ) : (
-    <ChecklistListSlot checklistCount={checklistCount} />
-  );
+  return activeView === 'dashboard' ? <DashboardFeature /> : <ChecklistListSlot checklistCount={checklistCount} />;
 }

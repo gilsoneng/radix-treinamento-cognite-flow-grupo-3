@@ -6,28 +6,15 @@
  */
 
 import { Badge } from '@cognite/aura/components';
-import { IconCircle, IconCircleCheck, IconProgress } from '@tabler/icons-react';
-import type { Icon } from '@tabler/icons-react';
 
 import type { Priority, StatusBucket } from '../contracts';
+import {
+  CHECKLIST_STATUS_PRESENTATION,
+  PRIORITY_PRESENTATION,
+} from '../presentation/badge-presentations';
 
 import { OverdueBadge } from './overdue-badge';
 import type { ChecklistRowVM } from './use-checklist-list-view-model';
-
-type StatusVariant = 'gray' | 'inProgress' | 'success';
-type PriorityVariant = 'error' | 'warning' | 'gray';
-
-const STATUS_META: Record<Exclude<StatusBucket, 'atrasado'>, { label: string; variant: StatusVariant; icon: Icon }> = {
-  aberto: { label: 'Aberto', variant: 'gray', icon: IconCircle },
-  em_andamento: { label: 'Em andamento', variant: 'inProgress', icon: IconProgress },
-  concluido: { label: 'Concluído', variant: 'success', icon: IconCircleCheck },
-};
-
-const PRIORITY_META: Record<Priority, { label: string; variant: PriorityVariant }> = {
-  alta: { label: 'Alta', variant: 'error' },
-  media: { label: 'Média', variant: 'warning' },
-  baixa: { label: 'Baixa', variant: 'gray' },
-};
 
 interface ChecklistRowProps {
   row: ChecklistRowVM;
@@ -36,7 +23,7 @@ interface ChecklistRowProps {
 }
 
 export function ChecklistRow({ row, selected, onSelect }: ChecklistRowProps) {
-  const priority = PRIORITY_META[row.priority];
+  const priority = PRIORITY_PRESENTATION[row.priority];
   return (
     <tr
       aria-selected={selected}
@@ -66,8 +53,15 @@ export function ChecklistRow({ row, selected, onSelect }: ChecklistRowProps) {
 }
 
 function StatusBadge({ status }: { status: Exclude<StatusBucket, 'atrasado'> }) {
-  const meta = STATUS_META[status];
+  const meta = CHECKLIST_STATUS_PRESENTATION[status];
   const StatusIcon = meta.icon;
+  if (StatusIcon === undefined) {
+    return (
+      <Badge variant={meta.variant} background>
+        {meta.label}
+      </Badge>
+    );
+  }
   return (
     <Badge variant={meta.variant} background className="gap-1">
       <StatusIcon aria-hidden className="size-3.5" />

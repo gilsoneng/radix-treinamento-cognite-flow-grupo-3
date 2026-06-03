@@ -1,10 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { makeAppStateApi, makeChecklist, makeDataSource, makeFeatureDeps } from '../../features/__mocks__/checklist-fixtures';
 import { FeatureDepsProvider } from '../../features';
 
 import { ShellContent } from './shell-content';
+
+vi.mock('../../features/dashboard/dashboard-feature', () => ({
+  DashboardFeature: () => <div aria-label="Dashboard de KPIs">Dashboard DEV 3</div>,
+}));
 import { toErrorMessage } from './to-error-message';
 
 describe('toErrorMessage', () => {
@@ -36,10 +40,9 @@ describe('ShellContent', () => {
     expect(screen.getByText('Nenhuma ronda no período')).toBeInTheDocument();
   });
 
-  it('mostra o slot do Dashboard quando a visão ativa é dashboard', () => {
+  it('mostra a feature do Dashboard quando a visão ativa é dashboard', () => {
     render(<ShellContent {...base} activeView="dashboard" />);
-    expect(screen.getByText('Dashboard de KPIs')).toBeInTheDocument();
-    expect(screen.getByText(/3 rondas carregadas/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Dashboard de KPIs')).toBeInTheDocument();
   });
 
   it('mostra o slot da Lista quando a visão ativa é list', () => {
