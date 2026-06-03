@@ -3,34 +3,31 @@ import { IconAlertTriangle, IconClipboardList } from '@tabler/icons-react';
 
 import type { ChecklistKpis, Priority, StatusBucket } from '../../domain';
 
+import {
+  CHECKLIST_STATUS_PRESENTATION,
+  ITEM_STATUS_PRESENTATION,
+  PRIORITY_PRESENTATION,
+  isItemStatusBucket,
+  type StatusBadgeVariant,
+} from '../presentation/badge-presentations';
+
 import { KpiCard } from './kpi-card';
 import { useDashboardViewModel } from './use-dashboard-view-model';
 
-const STATUS_LABELS: Record<StatusBucket, string> = {
-  aberto: 'Aberto',
-  em_andamento: 'Em andamento',
-  atrasado: 'Atrasado',
-  concluido: 'Concluído',
-};
+type DistributionVariant = StatusBadgeVariant | 'nordic';
 
-const PRIORITY_LABELS: Record<Priority, string> = {
-  alta: 'Alta',
-  media: 'Média',
-  baixa: 'Baixa',
-};
+interface DistributionEntry {
+  label: string;
+  count: number;
+  variant: DistributionVariant;
+}
 
 function hasAnyChecklist(kpis: ChecklistKpis): boolean {
   const statusTotal = Object.values(kpis.byStatus).reduce((sum, n) => sum + n, 0);
   return statusTotal > 0 || kpis.openCount > 0 || kpis.overdueCount > 0;
 }
 
-function DistributionBadges({
-  title,
-  entries,
-}: {
-  title: string;
-  entries: { label: string; count: number }[];
-}) {
+function DistributionBadges({ title, entries }: { title: string; entries: DistributionEntry[] }) {
   const nonZero = entries.filter((e) => e.count > 0);
   if (nonZero.length === 0) {
     return null;
@@ -43,7 +40,7 @@ function DistributionBadges({
       <ul className="flex flex-wrap gap-2">
         {nonZero.map((e) => (
           <li key={e.label}>
-            <Badge variant="nordic" background>
+            <Badge variant={e.variant} background>
               {e.label}: {e.count}
             </Badge>
           </li>
@@ -112,21 +109,23 @@ export function Dashboard() {
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           <DistributionBadges
             title="Por status"
-            entries={(Object.keys(STATUS_LABELS) as StatusBucket[]).map((key) => ({
-              label: STATUS_LABELS[key],
+            entries={(Object.keys(CHECKLIST_STATUS_PRESENTATION) as StatusBucket[]).map((key) => ({
+              label: CHECKLIST_STATUS_PRESENTATION[key].label,
               count: checklistKpis.byStatus[key],
+              variant: CHECKLIST_STATUS_PRESENTATION[key].variant,
             }))}
           />
           <DistributionBadges
             title="Por prioridade"
-            entries={(Object.keys(PRIORITY_LABELS) as Priority[]).map((key) => ({
-              label: PRIORITY_LABELS[key],
+            entries={(Object.keys(PRIORITY_PRESENTATION) as Priority[]).map((key) => ({
+              label: PRIORITY_PRESENTATION[key].label,
               count: checklistKpis.byPriority[key],
+              variant: PRIORITY_PRESENTATION[key].variant,
             }))}
           />
           <DistributionBadges
             title="Por área"
-            entries={checklistKpis.byArea.map((a) => ({ label: a.area, count: a.count }))}
+            entries={checklistKpis.byArea.map((a) => ({ label: a.area, count: a.count, variant: 'nordic' as const }))}
           />
         </div>
       </div>
@@ -151,7 +150,14 @@ export function Dashboard() {
           <div className="mt-4">
             <DistributionBadges
               title="Por status da tarefa"
-              entries={Object.entries(itemKpis.byItemStatus).map(([label, count]) => ({ label, count }))}
+              entries={Object.entries(itemKpis.byItemStatus).map(([key, count]) => {
+                const presentation = isItemStatusBucket(key) ? ITEM_STATUS_PRESENTATION[key] : null;
+                return {
+                  label: presentation?.label ?? key,
+                  count,
+                  variant: presentation?.variant ?? 'gray',
+                };
+              })}
             />
           </div>
         </div>
