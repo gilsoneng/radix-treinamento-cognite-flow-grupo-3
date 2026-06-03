@@ -9,6 +9,8 @@
  * `text-muted-foreground`), que o `brand-theme.css` mapeia a partir de `specs/design.md`.
  */
 
+import type { ReactNode } from 'react';
+
 import { useChecklistData } from '../data/use-checklist-data';
 import { useAppState } from '../state/use-app-state';
 
@@ -16,7 +18,13 @@ import { LastUpdated } from './last-updated';
 import { ShellContent } from './shell-content';
 import { ViewSwitcher } from './view-switcher';
 
-export function AppShell() {
+export interface AppShellProps {
+  /** Visões reais (DEV 3/DEV 4) injetadas pelo composition root. */
+  dashboardView?: ReactNode;
+  listView?: ReactNode;
+}
+
+export function AppShell({ dashboardView, listView }: AppShellProps = {}) {
   const { state, setActiveView } = useAppState();
   const { checklists, isLoading, isRefreshing, isError, error, lastUpdatedAt, refresh } = useChecklistData();
 
@@ -44,6 +52,8 @@ export function AppShell() {
           isError={isError}
           error={error}
           checklistCount={checklists.length}
+          dashboardView={dashboardView}
+          listView={listView}
         />
       </main>
     </div>

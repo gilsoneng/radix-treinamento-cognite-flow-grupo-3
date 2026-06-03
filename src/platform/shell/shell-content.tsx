@@ -6,6 +6,7 @@
 
 import { Alert, AlertDescription, AlertTitle, Card, CardContent, Loader } from '@cognite/aura/components';
 import { IconAlertTriangle, IconInbox } from '@tabler/icons-react';
+import type { ReactNode } from 'react';
 
 import type { ActiveView } from '../state/app-state';
 
@@ -18,9 +19,20 @@ export interface ShellContentProps {
   isError: boolean;
   error: unknown;
   checklistCount: number;
+  /** Visões reais injetadas pelo composition root (DEV 3/DEV 4). Default = placeholders DEV 1. */
+  dashboardView?: ReactNode;
+  listView?: ReactNode;
 }
 
-export function ShellContent({ activeView, isLoading, isError, error, checklistCount }: ShellContentProps) {
+export function ShellContent({
+  activeView,
+  isLoading,
+  isError,
+  error,
+  checklistCount,
+  dashboardView,
+  listView,
+}: ShellContentProps) {
   if (isLoading) {
     return (
       <Card aria-busy="true" aria-live="polite">
@@ -58,9 +70,8 @@ export function ShellContent({ activeView, isLoading, isError, error, checklistC
     );
   }
 
-  return activeView === 'dashboard' ? (
-    <DashboardSlot checklistCount={checklistCount} />
-  ) : (
-    <ChecklistListSlot checklistCount={checklistCount} />
-  );
+  if (activeView === 'dashboard') {
+    return <>{dashboardView ?? <DashboardSlot checklistCount={checklistCount} />}</>;
+  }
+  return <>{listView ?? <ChecklistListSlot checklistCount={checklistCount} />}</>;
 }

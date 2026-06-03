@@ -1,0 +1,72 @@
+import { renderHook } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { describe, expect, it } from 'vitest';
+
+import { makeAppState } from '../../__mocks__/app-state';
+import { makeChecklist } from '../../__mocks__/checklist';
+import { makeChecklistDataSource } from '../../__mocks__/checklist-data';
+import type { AppStateContextValue } from '../../platform';
+import type { Checklist } from '../../types/apm';
+
+import { DashboardViewModelContext, useDashboardViewModel } from './use-dashboard-view-model';
+import type { DashboardViewModelDeps } from './use-dashboard-view-model';
+
+const NOW = Date.UTC(2026, 5, 3);
+
+function scenarioChecklists(): Checklist[] {
+  return [
+    makeChecklist({ externalId: 'concluida', status: 'Completed', endTime: '2026-06-01T16:00:00.000Z' }),
+    makeChecklist({ externalId: 'atrasada', status: 'To Do', endTime: '2020-01-01T00:00:00.000Z' }),
+    makeChecklist({ externalId: 'andamento', status: 'Ongoing', endTime: '2030-01-01T00:00:00.000Z' }),
+  ];
+}
+
+function render(checklists: Checklist[], appState: AppStateContextValue) {
+  const deps: DashboardViewModelDeps = {
+    useChecklistData: () => makeChecklistDataSource({ checklists }),
+    useAppState: () => appState,
+    now: () => NOW,
+  };
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <DashboardViewModelContext.Provider value={deps}>{children}</DashboardViewModelContext.Provider>
+  );
+  return renderHook(() => useDashboardViewModel(), { wrapper });
+}
+
+describe('useDashboardViewModel', () => {
+  it('agrega KPIs sobre todas as rondas (sem filtro)', () => {
+    const { result } = render(scenarioChecklists(), makeAppState());
+
+    expect(result.current.checklistKpis.openCount).toBe(2); // atrasada + andamento
+    expect(result.current.checklistKpis.overdueCount).toBe(1);
+    expect(result.current.checklistKpis.byStatus.concluido).toBe(1);
+    expect(result.current.checklistKpis.byStatus.em_andamento).toBe(1);
+    expect(result.current.checklistKpis.byStatus.atrasado).toBe(1);
+    expect(result.current.rowCount).toBe(3);
+  });
+
+  it('os KPIs refletem o filtro "somente atrasados" (FR-006)', () => {
+    const appState = makeAppState({
+      filters: { status: [], onlyOverdue: true, priority: [], area: [], period: 'all' },
+    });
+    const { result } = render(scenarioChecklists(), appState);
+
+    expect(result.current.rowCount).toBe(1);
+    expect(result.current.checklistKpis.overdueCount).toBe(1);
+    expect(result.current.checklistKpis.openCount).toBe(1);
+  });
+
+  it('repassa loading/erro da fonte de dados', () => {
+    const deps: DashboardViewModelDeps = {
+      useChecklistData: () => makeChecklistDataSource({ isError: true, error: new Error('x') }),
+      useAppState: () => makeAppState(),
+      now: () => NOW,
+    };
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <DashboardViewModelContext.Provider value={deps}>{children}</DashboardViewModelContext.Provider>
+    );
+    const { result } = renderHook(() => useDashboardViewModel(), { wrapper });
+
+    expect(result.current.isError).toBe(true);
+  });
+});

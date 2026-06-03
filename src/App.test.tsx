@@ -66,7 +66,7 @@ describe('App', () => {
     expect(screen.getByText('Conectando ao projeto…')).toBeInTheDocument();
   });
 
-  it('renderiza o shell e o conteúdo com os dados do CDF quando conecta', async () => {
+  it('renderiza o shell e o dashboard real com os dados do CDF quando conecta', async () => {
     // Arrange / Act
     renderApp(makeConnectedDeps(), makeService(2));
 
@@ -75,8 +75,10 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /Dashboard/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Lista/ })).toBeInTheDocument();
 
-    // Assert — conteúdo com a contagem real de rondas
-    await waitFor(() => expect(screen.getByText(/2 rondas carregadas do CDF/)).toBeInTheDocument());
+    // Assert — dashboard real (DEV 3) montado sobre os dados (conteúdo independente do relógio)
+    await waitFor(() => expect(screen.getByText('Rondas abertas')).toBeInTheDocument());
+    expect(screen.getByText('No prazo (SLA)')).toBeInTheDocument();
+    expect(screen.getByText('Por status')).toBeInTheDocument();
   });
 
   it('mostra o estado vazio quando não há rondas', async () => {
