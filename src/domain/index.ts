@@ -5,6 +5,34 @@ export {
   parseDeadlineEndOfDay,
 } from './deadline';
 export { deriveArea } from './area';
+export {
+  CHART_RESULTS,
+  CHART_SCALES,
+  DEFAULT_CHART_SCALE,
+  type ChartResult,
+  type ChartScale,
+  type ChartSelection,
+} from './chart-types';
+export {
+  assetDrillRows,
+  buildChartData,
+  buildTimeBins,
+  classifyChartResult,
+  computeInstantCounts,
+  computeTimeSeries,
+  defaultItemTimestamp,
+  filterChecklistsByChartSelection,
+  flattenItems,
+  itemMatchesSelection,
+  itemsForSelection,
+  type AssetDrillRow,
+  type ChartResultBucket,
+  type ChartTimeSeries,
+  type ChartViewResult,
+  type InstantCounts,
+  type ItemTimestamp,
+  type TimeBin,
+} from './charts';
 export { applyFilters, isWithinPeriod } from './filters';
 export {
   classifyItemStatus,

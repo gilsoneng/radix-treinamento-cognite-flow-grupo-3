@@ -77,6 +77,42 @@ describe('AppStateProvider', () => {
     expect(result.current.state.detailOpen).toBe(false);
   });
 
+  it('selectChartBin aplica a seleção do gráfico e espelha no host (FR-008)', () => {
+    const api = makeHostAppApi();
+    const { result } = renderAppState(api);
+    const selection = { scale: '7d' as const, binStart: 1, binEnd: 2, result: 'not_ok' as const, binLabel: '15/05' };
+
+    act(() => result.current.selectChartBin(selection));
+
+    expect(result.current.state.chartSelection).toEqual(selection);
+    const calls = vi.mocked(api.syncInternalState).mock.calls;
+    const pushed = calls[calls.length - 1]?.[0];
+    expect(parseAppState(pushed).chartSelection).toEqual(selection);
+  });
+
+  it('setChartScale troca a escala e LIMPA a seleção (bins de granularidade diferente)', () => {
+    const api = makeHostAppApi();
+    const { result } = renderAppState(api);
+
+    act(() => result.current.selectChartBin({ scale: '7d', binStart: 1, binEnd: 2, result: 'ok', binLabel: '15/05' }));
+    act(() => result.current.setChartScale('12m'));
+
+    expect(result.current.state.chartScale).toBe('12m');
+    expect(result.current.state.chartSelection).toBeNull();
+  });
+
+  it('clearChartSelection limpa a seleção mantendo a escala (FR-011)', () => {
+    const api = makeHostAppApi();
+    const { result } = renderAppState(api);
+
+    act(() => result.current.setChartScale('12m'));
+    act(() => result.current.selectChartBin({ scale: '12m', binStart: 1, binEnd: 2, result: 'ok', binLabel: 'mai/26' }));
+    act(() => result.current.clearChartSelection());
+
+    expect(result.current.state.chartSelection).toBeNull();
+    expect(result.current.state.chartScale).toBe('12m');
+  });
+
   it('não quebra a UI se o host rejeitar o sync (fire-and-forget)', async () => {
     // Arrange — syncInternalState rejeita
     const api = makeHostAppApi({

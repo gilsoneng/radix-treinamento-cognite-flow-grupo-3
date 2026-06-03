@@ -9,25 +9,31 @@
 import { createContext, useContext } from 'react';
 
 import {
+  buildChartData,
   buildChecklistView,
   classifyItemStatus,
   classifyStatus,
   deriveArea,
   derivePriority,
+  filterChecklistsByChartSelection,
   isOverdue,
 } from '../domain';
+import type { ChartSelection, ItemStatusBucket , Priority, StatusBucket } from '../domain';
 import { useChecklistData } from '../platform/data/use-checklist-data';
 import { useAppState } from '../platform/state/use-app-state';
-
-import type { ItemStatusBucket } from '../domain';
-import type { AppStateApi, ChecklistDataSource } from './contracts';
 import type { Checklist, ChecklistItem } from '../types/apm';
-import type { Priority, StatusBucket } from '../domain';
+
+import type { AppStateApi, ChecklistDataSource } from './contracts';
+
 
 export interface FeatureDeps {
   useChecklistData: () => ChecklistDataSource;
   useAppState: () => AppStateApi;
   buildChecklistView: typeof buildChecklistView;
+  /** Orquestrador dos gráficos do dashboard (séries, instantâneo, drill-down). */
+  buildChartData: typeof buildChartData;
+  /** Recorta as rondas pela seleção do gráfico (cross-filter na lista, FR-008). */
+  filterChecklistsByChartSelection: (checklists: Checklist[], selection: ChartSelection, now: number) => Checklist[];
   classifyStatus: (checklist: Checklist, now: number) => StatusBucket;
   isOverdue: (checklist: Checklist, now: number) => boolean;
   derivePriority: (checklist: Checklist, now: number) => Priority;
@@ -41,6 +47,8 @@ export const DEFAULT_FEATURE_DEPS: FeatureDeps = {
   useChecklistData,
   useAppState,
   buildChecklistView,
+  buildChartData,
+  filterChecklistsByChartSelection,
   classifyStatus,
   isOverdue,
   derivePriority,

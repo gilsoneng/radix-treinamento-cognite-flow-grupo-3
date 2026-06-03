@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { makeAppStateApi, makeChecklist, makeDataSource, makeFeatureDeps } from '../../features/__mocks__/checklist-fixtures';
 import { FeatureDepsProvider } from '../../features';
+import { makeAppStateApi, makeChecklist, makeDataSource, makeFeatureDeps } from '../../features/__mocks__/checklist-fixtures';
 
 import { ShellContent } from './shell-content';
 import { toErrorMessage } from './to-error-message';
@@ -36,10 +36,29 @@ describe('ShellContent', () => {
     expect(screen.getByText('Nenhuma ronda no período')).toBeInTheDocument();
   });
 
-  it('mostra o slot do Dashboard quando a visão ativa é dashboard', () => {
-    render(<ShellContent {...base} activeView="dashboard" />);
-    expect(screen.getByText('Dashboard de KPIs')).toBeInTheDocument();
-    expect(screen.getByText(/3 rondas carregadas/)).toBeInTheDocument();
+  it('mostra o slot do Dashboard (gráficos) quando a visão ativa é dashboard', () => {
+    const deps = makeFeatureDeps({
+      useChecklistData: () => makeDataSource({ checklists: [makeChecklist({ externalId: 'c1' })] }),
+      useAppState: () => makeAppStateApi({ activeView: 'dashboard' }),
+      buildChartData: (_all, _filters, _search, scale, selection) => ({
+        scale,
+        timeSeries: { scale, bins: [{ key: 'd-1', label: '15/05', start: 1, end: 2 }], ok: [1], notOk: [0] },
+        instant: { ok: 1, notOk: 0, outros: 0, total: 1 },
+        drillAssets: [],
+        totalFilteredItems: 1,
+        hasSelection: selection !== null,
+      }),
+    });
+
+    render(
+      <FeatureDepsProvider deps={deps}>
+        <ShellContent {...base} activeView="dashboard" />
+      </FeatureDepsProvider>
+    );
+
+    // O Dashboard real renderiza os KPIs de item e os títulos dos gráficos.
+    expect(screen.getByText('Itens (total)')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'OK/Not Ok ao longo do tempo' })).toBeInTheDocument();
   });
 
   it('mostra o slot da Lista quando a visão ativa é list', () => {

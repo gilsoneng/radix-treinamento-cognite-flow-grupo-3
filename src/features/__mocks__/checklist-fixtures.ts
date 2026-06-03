@@ -125,6 +125,9 @@ export function makeAppStateApi(state: Partial<AppState> = {}, overrides: Partia
     setSearch: vi.fn(),
     selectChecklist: vi.fn(),
     closeDetail: vi.fn(),
+    setChartScale: vi.fn(),
+    selectChartBin: vi.fn(),
+    clearChartSelection: vi.fn(),
     ...overrides,
   };
 }
@@ -158,6 +161,15 @@ export function makeFeatureDeps(overrides: Partial<FeatureDeps> = {}): FeatureDe
       },
       itemKpis: { totalItems: 0, openItems: 0, overdueItems: 0, byItemStatus: {} },
     }),
+    buildChartData: (_all, _filters, _search, scale, selection) => ({
+      scale,
+      timeSeries: { scale, bins: [], ok: [], notOk: [] },
+      instant: { ok: 0, notOk: 0, outros: 0, total: 0 },
+      drillAssets: [],
+      totalFilteredItems: 0,
+      hasSelection: selection !== null,
+    }),
+    filterChecklistsByChartSelection: (checklists) => checklists,
     classifyStatus: (checklist) => defaultClassify(checklist),
     isOverdue: () => false,
     derivePriority: () => 'media',

@@ -8,10 +8,10 @@
 
 import { useMemo } from 'react';
 
-import { useFeatureDeps } from '../feature-deps';
 
 import type { ItemStatusBucket } from '../../domain';
 import type { Checklist } from '../../types/apm';
+import { useFeatureDeps } from '../feature-deps';
 
 
 export interface ChecklistDetailViewModel {

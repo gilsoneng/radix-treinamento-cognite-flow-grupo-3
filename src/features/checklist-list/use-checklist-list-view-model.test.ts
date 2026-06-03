@@ -10,9 +10,9 @@ import {
   makeFeatureDeps,
   NOW,
 } from '../__mocks__/checklist-fixtures';
+import type { Filters, SortState } from '../contracts';
 import { FeatureDepsContext } from '../feature-deps';
 import type { FeatureDeps } from '../feature-deps';
-import type { Filters, SortState } from '../contracts';
 
 import { useChecklistListViewModel } from './use-checklist-list-view-model';
 
@@ -145,6 +145,39 @@ describe(useChecklistListViewModel.name, () => {
     result.current.toggleSort('status');
 
     expect(setSort).toHaveBeenCalledWith({ key: 'status', dir: 'asc' });
+  });
+
+  it('aplica o cross-filter do gráfico recortando as rondas pela seleção (FR-008)', () => {
+    // Arrange
+    const a = makeChecklist({ externalId: 'a' });
+    const b = makeChecklist({ externalId: 'b' });
+    const selection = { scale: '7d' as const, binStart: 1, binEnd: 2, result: 'not_ok' as const, binLabel: '15/05' };
+    const filterChecklistsByChartSelection = vi.fn(() => [b]);
+    const deps = makeFeatureDeps({
+      useChecklistData: () => makeDataSource({ checklists: [a, b] }),
+      useAppState: () => makeAppStateApi({ chartSelection: selection }),
+      filterChecklistsByChartSelection,
+    });
+
+    // Act
+    const { result } = render(deps);
+
+    // Assert — só a ronda que a seleção mantém aparece.
+    expect(filterChecklistsByChartSelection).toHaveBeenCalledWith([a, b], selection, NOW);
+    expect(result.current.rows.map((r) => r.id)).toEqual(['b']);
+  });
+
+  it('não chama o cross-filter quando não há seleção de gráfico', () => {
+    const filterChecklistsByChartSelection = vi.fn(() => []);
+    const deps = makeFeatureDeps({
+      useChecklistData: () => makeDataSource({ checklists: [makeChecklist({ externalId: 'a' })] }),
+      filterChecklistsByChartSelection,
+    });
+
+    const { result } = render(deps);
+
+    expect(filterChecklistsByChartSelection).not.toHaveBeenCalled();
+    expect(result.current.rows.map((r) => r.id)).toEqual(['a']);
   });
 
   it('selectRow seleciona a ronda pelo id', () => {

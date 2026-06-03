@@ -58,9 +58,5 @@ export function ShellContent({ activeView, isLoading, isError, error, checklistC
     );
   }
 
-  return activeView === 'dashboard' ? (
-    <DashboardSlot checklistCount={checklistCount} />
-  ) : (
-    <ChecklistListSlot checklistCount={checklistCount} />
-  );
+  return activeView === 'dashboard' ? <DashboardSlot /> : <ChecklistListSlot checklistCount={checklistCount} />;
 }

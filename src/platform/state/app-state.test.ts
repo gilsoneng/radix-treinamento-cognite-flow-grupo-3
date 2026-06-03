@@ -28,6 +28,8 @@ describe('parseAppState', () => {
       search: 'bomba',
       selectedChecklistId: 'checklist-7',
       detailOpen: true,
+      chartScale: '12m',
+      chartSelection: { scale: '12m', binStart: 1_700_000_000_000, binEnd: 1_702_000_000_000, result: 'not_ok', binLabel: 'mai/26' },
     };
 
     // Act
@@ -35,6 +37,32 @@ describe('parseAppState', () => {
 
     // Assert
     expect(restored).toEqual(state);
+  });
+
+  it('faz seed dos campos de gráfico no default quando ausentes (links antigos)', () => {
+    const parsed = parseAppState(JSON.stringify({ activeView: 'list' }));
+    expect(parsed.chartScale).toBe('30d');
+    expect(parsed.chartSelection).toBeNull();
+  });
+
+  it('descarta uma chartSelection inválida (cai para null sem quebrar)', () => {
+    const raw = JSON.stringify({
+      chartScale: 'decada', // inválida → default
+      chartSelection: { scale: '7d', binStart: 'x', binEnd: 10, result: 'talvez', binLabel: 5 },
+    });
+    const parsed = parseAppState(raw);
+    expect(parsed.chartScale).toBe('30d');
+    expect(parsed.chartSelection).toBeNull();
+  });
+
+  it('aceita uma chartSelection válida e normaliza binLabel ausente', () => {
+    const raw = JSON.stringify({
+      chartScale: '7d',
+      chartSelection: { scale: '7d', binStart: 1, binEnd: 2, result: 'ok' },
+    });
+    const parsed = parseAppState(raw);
+    expect(parsed.chartScale).toBe('7d');
+    expect(parsed.chartSelection).toEqual({ scale: '7d', binStart: 1, binEnd: 2, result: 'ok', binLabel: '' });
   });
 
   it('cai no default por campo quando valores são inválidos (tolerante a links antigos)', () => {

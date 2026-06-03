@@ -75,8 +75,8 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /Dashboard/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Lista/ })).toBeInTheDocument();
 
-    // Assert — conteúdo com a contagem real de rondas
-    await waitFor(() => expect(screen.getByText(/2 rondas carregadas do CDF/)).toBeInTheDocument());
+    // Assert — a visão padrão (dashboard de gráficos) montou com os dados do CDF
+    await waitFor(() => expect(screen.getByText('Itens (total)')).toBeInTheDocument());
   });
 
   it('mostra o estado vazio quando não há rondas', async () => {
