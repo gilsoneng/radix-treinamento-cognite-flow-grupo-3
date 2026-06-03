@@ -65,7 +65,7 @@
 <!-- Resolver antes/junto ao planejamento. -->
 
 - **Prioridade:** Checklists no APMAppData v13 podem não ter prioridade nativa. Confirmar no modelo do `radix-dev` se a prioridade está na própria Checklist, no Template/Activity associado, ou se deve ser **derivada** (atraso/criticidade do ativo). *(Resposta do usuário: "confirmar no modelo".)*
-- **Definição de "prazo":** qual propriedade representa o prazo da ronda (`endTime` planejado, `dueDate`, outro)? E o que conta como "no prazo" para o SLA (concluída antes de qual data)?
+- **Definição de "prazo":** implementado em `src/domain/deadline.ts` — prazo = `Checklist.endTime`; ainda no prazo no instante exato de `endTime`; atrasado após o fim do dia civil em `America/Sao_Paulo`. SLA = ronda concluída com `lastUpdatedTime` ≤ fim do dia civil do `endTime` (`slaOnTimePercent`).
 - **Equipe/turno:** `assignedTo` aponta para usuário/disciplina. Há campo de **turno/equipe** para agrupar, ou precisamos mapear a partir de `assignedTo`?
 - **Área/ativo:** a "área" vem do `assetExternalId` do ChecklistItem, do `rootLocation` da Checklist, ou da hierarquia de ativos? Como agrupar "por área"?
 - **Nomes/versões exatos:** confirmar as versões das views `Checklist` e `ChecklistItem` dentro do APMAppData v13 e os nomes precisos das propriedades.
