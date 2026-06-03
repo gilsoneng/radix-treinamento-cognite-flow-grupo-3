@@ -14,6 +14,7 @@ certificates
 # Environment variables
 .env
 .env.*
+!.env.example
 *.key
 *.pem
 
@@ -24,4 +25,37 @@ certificates
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python — byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python — packaging / build artifacts
+*.egg-info/
+.eggs/
+build/
+sdist/
+wheels/
+*.egg
+
+# Python — virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python — test / type / lint caches
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local vendored Python deps (temporary, reinstalled from requirements.txt)
+.tmp_py/
 

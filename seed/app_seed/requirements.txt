@@ -1,0 +1,4 @@
+cognite-sdk>=7,<8
+python-dotenv>=1.0
+# dev
+pytest>=8

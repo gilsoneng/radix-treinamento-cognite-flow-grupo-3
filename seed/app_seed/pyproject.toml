@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "app-seed"
+version = "1.0.0"
+description = "Gera e popula o seed OEC (Route 1) no data model cdf_apm.ApmAppData:v13 do CDF."
+requires-python = ">=3.10"
+dependencies = [
+    "cognite-sdk>=7,<8",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+app-seed = "app_seed.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["app_seed*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.pyright]
+include = ["app_seed", "tests"]
+extraPaths = ["."]
