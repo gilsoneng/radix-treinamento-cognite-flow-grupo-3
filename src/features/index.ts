@@ -7,6 +7,7 @@
 
 export { ChecklistTable } from './checklist-list';
 export { ChecklistDetailDrawer } from './checklist-detail';
+export { Dashboard } from './dashboard';
 export { FeatureDepsProvider } from './feature-deps-provider';
 export { DEFAULT_FEATURE_DEPS, useFeatureDeps } from './feature-deps';
 export type { FeatureDeps } from './feature-deps';

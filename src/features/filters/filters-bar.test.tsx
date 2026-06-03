@@ -26,6 +26,9 @@ function makeContext(): FiltersViewModelContextType & { appActions: AppStateCont
     setSearch,
     selectChecklist: vi.fn(),
     closeDetail: vi.fn(),
+    setChartScale: vi.fn(),
+    selectChartBin: vi.fn(),
+    clearChartSelection: vi.fn(),
   };
   const data: ChecklistDataSource = {
     checklists: [

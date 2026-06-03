@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { buildRouteSeedPayload } from './lib/build-route-seed.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

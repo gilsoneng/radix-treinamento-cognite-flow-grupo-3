@@ -8,10 +8,10 @@
 
 import { useMemo } from 'react';
 
+import type { Checklist } from '../../types/apm';
 import type { Priority, SortKey, SortState, StatusBucket } from '../contracts';
 import { useFeatureDeps } from '../feature-deps';
 
-import type { Checklist } from '../../types/apm';
 
 export interface ChecklistRowVM {
   id: string;
@@ -40,18 +40,30 @@ export interface ChecklistListViewModel {
 }
 
 export function useChecklistListViewModel(): ChecklistListViewModel {
-  const { useChecklistData, useAppState, buildChecklistView, classifyStatus, isOverdue, derivePriority, deriveArea, now } =
-    useFeatureDeps();
+  const {
+    useChecklistData,
+    useAppState,
+    buildChecklistView,
+    filterChecklistsByChartSelection,
+    classifyStatus,
+    isOverdue,
+    derivePriority,
+    deriveArea,
+    now,
+  } = useFeatureDeps();
 
   const { checklists, isLoading, isError, lastUpdatedAt } = useChecklistData();
   const { state, setSort, selectChecklist } = useAppState();
-  const { filters, sort, search, selectedChecklistId } = state;
+  const { filters, sort, search, selectedChecklistId, chartSelection } = state;
 
   const rows = useMemo<ChecklistRowVM[]>(() => {
     if (isLoading || isError) return [];
     const at = lastUpdatedAt ?? now();
     const view = buildChecklistView(checklists, filters, search, sort, at);
-    return view.rows.map((checklist) => toRow(checklist, at, { classifyStatus, isOverdue, derivePriority, deriveArea }));
+    // Cross-filter do gráfico (FR-008): quando há seleção, só rondas com itens naquele
+    // ponto/barra permanecem na tabela.
+    const scoped = chartSelection ? filterChecklistsByChartSelection(view.rows, chartSelection, at) : view.rows;
+    return scoped.map((checklist) => toRow(checklist, at, { classifyStatus, isOverdue, derivePriority, deriveArea }));
   }, [
     checklists,
     isLoading,
@@ -60,8 +72,10 @@ export function useChecklistListViewModel(): ChecklistListViewModel {
     filters,
     search,
     sort,
+    chartSelection,
     now,
     buildChecklistView,
+    filterChecklistsByChartSelection,
     classifyStatus,
     isOverdue,
     derivePriority,

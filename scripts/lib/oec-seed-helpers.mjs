@@ -133,9 +133,9 @@ export function measurementExternalIdFromKey(key) {
 /**
  * @param {() => number} rng
  * @param {string | null} sourceCreatedTime
- * @param {string | null} sourceUpdatedTime
+ * @param {string | null} _sourceUpdatedTime
  */
-export function buildChecklistItemTimes(rng, sourceCreatedTime, sourceUpdatedTime) {
+export function buildChecklistItemTimes(rng, sourceCreatedTime, _sourceUpdatedTime) {
   const now = new Date('2026-06-02T12:00:00Z');
   const base = sourceCreatedTime ? new Date(sourceCreatedTime) : now;
 

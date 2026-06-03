@@ -7,7 +7,7 @@
 
 import { Badge } from '@cognite/aura/components';
 
-import type { Priority, StatusBucket } from '../contracts';
+import type { StatusBucket } from '../contracts';
 import {
   CHECKLIST_STATUS_PRESENTATION,
   PRIORITY_PRESENTATION,

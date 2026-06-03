@@ -40,6 +40,9 @@ function makeAppState(overrides: Partial<AppStateContextValue> = {}): AppStateCo
     setSearch,
     selectChecklist: vi.fn(),
     closeDetail: vi.fn(),
+    setChartScale: vi.fn(),
+    selectChartBin: vi.fn(),
+    clearChartSelection: vi.fn(),
     ...overrides,
   };
 }

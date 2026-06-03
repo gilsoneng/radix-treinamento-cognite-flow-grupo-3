@@ -8,6 +8,7 @@
 
 import { createContext } from 'react';
 
+import type { ChartScale, ChartSelection } from '../../domain/chart-types';
 import type { Filters, Sort } from '../../domain/types';
 
 import type { ActiveView, AppState } from './app-state';
@@ -22,6 +23,12 @@ export interface AppStateContextValue {
   selectChecklist(id: string): void;
   /** Fecha o detalhe mantendo a seleção (para o link compartilhado continuar coerente). */
   closeDetail(): void;
+  /** Troca a escala do gráfico temporal; limpa a seleção (os bins mudam de granularidade). */
+  setChartScale(scale: ChartScale): void;
+  /** Aplica a seleção do gráfico (cross-filter, FR-008). */
+  selectChartBin(selection: ChartSelection): void;
+  /** Limpa a seleção do gráfico mantendo a escala (FR-011). */
+  clearChartSelection(): void;
 }
 
 export const AppStateContext = createContext<AppStateContextValue | null>(null);

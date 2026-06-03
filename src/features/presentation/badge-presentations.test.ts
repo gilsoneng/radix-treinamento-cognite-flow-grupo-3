@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ItemStatusBucket, Priority, StatusBucket } from '../../domain/types';
+import type { ItemStatusBucket, Priority, StatusBucket } from '../../domain';
 import { PRIORITIES, STATUS_BUCKETS } from '../../domain/types';
 
 import {

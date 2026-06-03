@@ -47,6 +47,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setSearch: (search) => commit({ ...state, search }),
       selectChecklist: (id) => commit({ ...state, selectedChecklistId: id, detailOpen: true }),
       closeDetail: () => commit({ ...state, detailOpen: false }),
+      // Trocar a escala limpa a seleção: os bins de 7d/30d/12m têm granularidades diferentes,
+      // então um bin selecionado em uma escala não se mapeia em outra.
+      setChartScale: (chartScale) => commit({ ...state, chartScale, chartSelection: null }),
+      selectChartBin: (chartSelection) => commit({ ...state, chartSelection }),
+      clearChartSelection: () => commit({ ...state, chartSelection: null }),
     };
   }, [state, api]);
 

@@ -214,7 +214,7 @@ function buildChecklistInstance(floor, meta) {
   };
 }
 
-function buildChecklistItemInstance(item, meta) {
+function buildChecklistItemInstance(item, _meta) {
   const properties = {
     title: item.title,
     order: item.order,

@@ -10,6 +10,8 @@
  * (CLAUDE.md §7): a validação usa type guards.
  */
 
+import type { ChartResult, ChartScale, ChartSelection } from '../../domain/chart-types';
+import { CHART_RESULTS, CHART_SCALES, DEFAULT_CHART_SCALE } from '../../domain/chart-types';
 import type { Filters, Period, Priority, Sort, SortDir, SortKey, StatusBucket } from '../../domain/types';
 import { EMPTY_FILTERS, PERIODS, PRIORITIES, SORT_DIRS, SORT_KEYS, STATUS_BUCKETS } from '../../domain/types';
 
@@ -24,6 +26,10 @@ export interface AppState {
   search: string;
   selectedChecklistId: string | null;
   detailOpen: boolean;
+  /** Escala visual do gráfico temporal do dashboard (FR-005). */
+  chartScale: ChartScale;
+  /** Seleção do gráfico (cross-filter); `null` = sem recorte por gráfico (FR-008/011). */
+  chartSelection: ChartSelection | null;
 }
 
 /** Estado inicial quando não há nada na URL (primeira abertura). */
@@ -34,6 +40,8 @@ export const DEFAULT_STATE: AppState = {
   search: '',
   selectedChecklistId: null,
   detailOpen: false,
+  chartScale: DEFAULT_CHART_SCALE,
+  chartSelection: null,
 };
 
 // --- Type guards (puros, sem `as`) ---
@@ -77,6 +85,30 @@ function parseSort(value: unknown): Sort {
   return { key, dir };
 }
 
+function parseChartScale(value: unknown): ChartScale {
+  return oneOf(value, CHART_SCALES) ? value : DEFAULT_CHART_SCALE;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+/**
+ * Seleção tolerante: qualquer campo ausente/ inválido → `null` (sem recorte). Um link
+ * antigo sem `chartSelection`, ou com lixo, nunca quebra a tela — apenas não aplica recorte.
+ */
+function parseChartSelection(value: unknown): ChartSelection | null {
+  if (!isRecord(value)) return null;
+  const scale: ChartScale = parseChartScale(value.scale);
+  if (!isFiniteNumber(value.binStart) || !isFiniteNumber(value.binEnd) || value.binEnd <= value.binStart) {
+    return null;
+  }
+  const result: ChartResult | null = oneOf(value.result, CHART_RESULTS) ? value.result : null;
+  if (result === null) return null;
+  const binLabel = typeof value.binLabel === 'string' ? value.binLabel : '';
+  return { scale, binStart: value.binStart, binEnd: value.binEnd, result, binLabel };
+}
+
 /**
  * Reconstrói um `AppState` válido a partir da string do host (ou `undefined`).
  * Qualquer parte ausente/ inválida assume o default — a tela nunca quebra por estado ruim.
@@ -99,6 +131,8 @@ export function parseAppState(raw: string | undefined): AppState {
     search: typeof parsed.search === 'string' ? parsed.search : '',
     selectedChecklistId: typeof parsed.selectedChecklistId === 'string' ? parsed.selectedChecklistId : null,
     detailOpen: typeof parsed.detailOpen === 'boolean' ? parsed.detailOpen : false,
+    chartScale: parseChartScale(parsed.chartScale),
+    chartSelection: parseChartSelection(parsed.chartSelection),
   };
 }
 
