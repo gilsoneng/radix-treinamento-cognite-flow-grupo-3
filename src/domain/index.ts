@@ -29,6 +29,7 @@ export {
   type Filters,
   type Period,
   type Priority,
+  type Sort,
   type SortDir,
   type SortKey,
   type StatusBucket,

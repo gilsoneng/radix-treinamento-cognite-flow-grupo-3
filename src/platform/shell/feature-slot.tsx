@@ -9,6 +9,8 @@
 
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cognite/aura/components';
 
+import { ChecklistDetailDrawer, ChecklistTable } from '../../features';
+
 export interface FeatureSlotProps {
   /** Total de rondas carregadas (após a plataforma buscar do CDF). */
   checklistCount: number;
@@ -35,12 +37,11 @@ export function ChecklistListSlot({ checklistCount }: FeatureSlotProps) {
     <Card>
       <CardHeader>
         <CardTitle as="h2">Lista de Checklists</CardTitle>
-        <CardDescription>Área reservada para a DEV 4 (tabela de rondas + drawer de detalhe).</CardDescription>
+        <CardDescription>{checklistCount} rondas carregadas do CDF.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Badge variant="nordic" background>
-          {checklistCount} rondas prontas para listar
-        </Badge>
+        <ChecklistTable />
+        <ChecklistDetailDrawer />
       </CardContent>
     </Card>
   );
