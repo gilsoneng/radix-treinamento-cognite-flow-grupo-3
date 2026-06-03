@@ -39,8 +39,8 @@ export interface Sort {
   dir: SortDir;
 }
 
-/** Indicadores do topo do dashboard (FR-002). */
-export interface Kpis {
+/** Indicadores de rondas (checklists) do topo do dashboard (FR-002). */
+export interface ChecklistKpis {
   openCount: number;
   overdueCount: number;
   /** 0..100 — % concluído no prazo (SLA). */
@@ -48,6 +48,14 @@ export interface Kpis {
   byStatus: Record<StatusBucket, number>;
   byPriority: Record<Priority, number>;
   byArea: { area: string; count: number }[];
+}
+
+/** Indicadores agregados dos ITENS dentro das rondas. */
+export interface ChecklistItemKpis {
+  totalItems: number;
+  openItems: number;
+  overdueItems: number;
+  byItemStatus: Record<string, number>;
 }
 
 // --- Conjuntos válidos (usados para validar estado vindo de links compartilhados) ---
@@ -65,4 +73,20 @@ export const EMPTY_FILTERS: Filters = {
   priority: [],
   area: [],
   period: '30d',
+};
+
+/** Alias de `EMPTY_FILTERS` usado pela camada de domínio (DEV 2) e seus testes. */
+export const DEFAULT_FILTERS: Filters = EMPTY_FILTERS;
+
+export const EMPTY_STATUS_BUCKETS: Record<StatusBucket, number> = {
+  aberto: 0,
+  em_andamento: 0,
+  atrasado: 0,
+  concluido: 0,
+};
+
+export const EMPTY_PRIORITY_BUCKETS: Record<Priority, number> = {
+  alta: 0,
+  media: 0,
+  baixa: 0,
 };

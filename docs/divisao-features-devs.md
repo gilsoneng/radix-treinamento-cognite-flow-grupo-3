@@ -159,6 +159,9 @@ conseguem montar suas telas dentro do shell.
 
 ## DEV 2 — Lógica de domínio pura (o "motor")
 
+> **Handoff implementado:** [dev2-dominio-handoff.md](./dev2-dominio-handoff.md) — guia de consumo
+> para DEV 1/3/4 (`src/domain`, pipeline, KPIs duplos, decisões de prazo/status).
+
 **Missão.** Transformar o domínio cru do service em **semântica de produto**: classificar
 status, identificar atrasados, calcular SLA e KPIs, e fornecer filtros/ordenação/busca.
 Tudo **funções puras** (sem React, sem SDK) — a camada mais testável do app.
@@ -432,7 +435,7 @@ export interface Filters {
   period: Period;
 }
 
-export interface Kpis {
+export interface ChecklistKpis {
   openCount: number;
   overdueCount: number;
   slaOnTimePercent: number;          // 0..100
@@ -441,19 +444,34 @@ export interface Kpis {
   byArea: { area: string; count: number }[];
 }
 
+export interface ChecklistItemKpis {
+  totalItems: number;
+  openItems: number;
+  overdueItems: number;
+  byItemStatus: Record<string, number>;
+}
+
 export function classifyStatus(c: Checklist, now: number): StatusBucket;
 export function isOverdue(c: Checklist, now: number): boolean;
-export function derivePriority(c: Checklist): Priority;
+export function derivePriority(c: Checklist, now: number): Priority;
 export function deriveArea(c: Checklist): string | null;
 export function isWithinPeriod(c: Checklist, period: Period, now: number): boolean;
 export function applyFilters(cs: Checklist[], f: Filters, now: number): Checklist[];
 export function applySearch(cs: Checklist[], query: string): Checklist[];
 export function sortChecklists(cs: Checklist[], s: { key: SortKey; dir: SortDir }, now: number): Checklist[];
-export function computeKpis(cs: Checklist[], now: number): Kpis;
+export function computeChecklistKpis(cs: Checklist[], now: number): ChecklistKpis;
+export function computeChecklistItemKpis(cs: Checklist[], now: number): ChecklistItemKpis;
+export function computeKpis(cs: Checklist[], now: number): ChecklistKpis; // alias
+export function buildChecklistView(...): { rows: Checklist[]; checklistKpis: ChecklistKpis; itemKpis: ChecklistItemKpis };
 ```
 
+> **Prazo:** `endTime` da ronda; ainda no prazo no instante exato de `endTime`; **atrasado**
+> após o último ms do dia civil em `America/Sao_Paulo` (`parseDeadlineEndOfDay` /
+> `isPastDeadline` em `src/domain/deadline.ts`).
+>
 > `now` é **injetado** em todas as funções de domínio (testabilidade + auto-refresh
-> determinístico, [CLAUDE.md §3](../CLAUDE.md)).
+> determinístico, [CLAUDE.md §3](../CLAUDE.md)). KPIs de ronda e de item são calculados
+> sobre a lista **já filtrada/buscada**; use `buildChecklistView` para alinhar lista e KPIs.
 
 ---
 
