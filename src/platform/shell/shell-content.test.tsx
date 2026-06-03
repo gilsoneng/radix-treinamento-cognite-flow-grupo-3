@@ -1,6 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { makeAppStateApi, makeChecklist, makeDataSource, makeFeatureDeps } from '../../features/__mocks__/checklist-fixtures';
+import { FeatureDepsProvider } from '../../features';
+
 import { ShellContent } from './shell-content';
 
 vi.mock('../../features/dashboard/dashboard-feature', () => ({
@@ -43,7 +46,19 @@ describe('ShellContent', () => {
   });
 
   it('mostra o slot da Lista quando a visão ativa é list', () => {
-    render(<ShellContent {...base} activeView="list" />);
+    const checklist = makeChecklist({ externalId: 'c1', title: 'Ronda integrada' });
+    const deps = makeFeatureDeps({
+      useChecklistData: () => makeDataSource({ checklists: [checklist] }),
+      useAppState: () => makeAppStateApi({ activeView: 'list' }),
+    });
+
+    render(
+      <FeatureDepsProvider deps={deps}>
+        <ShellContent {...base} activeView="list" />
+      </FeatureDepsProvider>
+    );
+
     expect(screen.getByText('Lista de Checklists')).toBeInTheDocument();
+    expect(screen.getByText('Ronda integrada')).toBeInTheDocument();
   });
 });
