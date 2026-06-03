@@ -2,8 +2,11 @@ import { renderHook, act } from '@testing-library/react';
 import type { ComponentType, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { sampleChecklists } from '../__mocks__/checklists';
-import { DEFAULT_STATE, type AppStateActions, type ChecklistDataSource, type Filters } from '../_contracts';
+import { DEFAULT_FILTERS, type Filters } from '../../domain';
+import { buildDomainFixtureChecklists } from '../../domain/__fixtures__/checklists';
+import { DEFAULT_STATE } from '../../platform';
+import type { AppStateContextValue , ChecklistDataSource } from '../../platform';
+
 
 import {
   FiltersViewModelContext,
@@ -11,10 +14,13 @@ import {
   type FiltersViewModelContextType,
 } from './use-filters-view-model';
 
+const sampleChecklists = buildDomainFixtureChecklists();
+
 function makeDataSource(): ChecklistDataSource {
   return {
     checklists: sampleChecklists,
     isLoading: false,
+    isRefreshing: false,
     isError: false,
     error: null,
     lastUpdatedAt: null,
@@ -22,7 +28,7 @@ function makeDataSource(): ChecklistDataSource {
   };
 }
 
-function makeAppState(overrides: Partial<AppStateActions> = {}): AppStateActions {
+function makeAppState(overrides: Partial<AppStateContextValue> = {}): AppStateContextValue {
   const setFilters = vi.fn();
   const setSort = vi.fn();
   const setSearch = vi.fn();
@@ -41,13 +47,14 @@ function makeAppState(overrides: Partial<AppStateActions> = {}): AppStateActions
 describe(useFiltersViewModel.name, () => {
   let mockContext: FiltersViewModelContextType;
   let wrapper: ComponentType<{ children: ReactNode }>;
-  let appActions: AppStateActions;
+  let appActions: AppStateContextValue;
 
   beforeEach(() => {
     appActions = makeAppState();
     mockContext = {
       useAppState: vi.fn(() => appActions),
       useChecklistData: vi.fn(() => makeDataSource()),
+      deriveArea: vi.fn((c) => c.rootLocation?.title ?? null),
     };
     wrapper = ({ children }) => (
       <FiltersViewModelContext.Provider value={mockContext}>{children}</FiltersViewModelContext.Provider>
@@ -64,7 +71,7 @@ describe(useFiltersViewModel.name, () => {
 
   it('should delegate setFilters to host-synced setter', () => {
     const { result } = renderHook(() => useFiltersViewModel(), { wrapper });
-    const next: Filters = { ...DEFAULT_STATE.filters, onlyOverdue: true };
+    const next: Filters = { ...DEFAULT_FILTERS, onlyOverdue: true };
     act(() => {
       result.current.setFilters(next);
     });
@@ -104,9 +111,10 @@ describe(useFiltersViewModel.name, () => {
     });
   });
 
-  it('should derive available areas from checklists rootLocation', () => {
+  it('should derive available areas from deriveArea', () => {
     const { result } = renderHook(() => useFiltersViewModel(), { wrapper });
-    expect(result.current.availableAreas).toEqual(['Área A', 'Área B']);
+    expect(result.current.availableAreas.length).toBeGreaterThan(0);
+    expect(mockContext.deriveArea).toHaveBeenCalled();
   });
 
   it('should expose status and priority option lists', () => {

@@ -1,18 +1,13 @@
 import { createContext, useContext, useMemo } from 'react';
 
-import {
-  applyFilters,
-  applySearch,
-  computeKpis,
-  useAppState,
-  useChecklistData,
-  type Kpis,
-} from '../_contracts';
+import { buildChecklistView, type ChecklistItemKpis, type ChecklistKpis } from '../../domain';
+import { useAppState, useChecklistData } from '../../platform';
 
 export interface DashboardViewModel {
   isLoading: boolean;
   isError: boolean;
-  kpis: Kpis | null;
+  checklistKpis: ChecklistKpis | null;
+  itemKpis: ChecklistItemKpis | null;
   lastUpdatedAt: number | null;
   refresh(): void;
 }
@@ -20,44 +15,39 @@ export interface DashboardViewModel {
 export type DashboardViewModelContextType = {
   useChecklistData: typeof useChecklistData;
   useAppState: typeof useAppState;
-  applyFilters: typeof applyFilters;
-  applySearch: typeof applySearch;
-  computeKpis: typeof computeKpis;
+  buildChecklistView: typeof buildChecklistView;
   getNow: () => number;
 };
 
 const defaultDeps: DashboardViewModelContextType = {
   useChecklistData,
   useAppState,
-  applyFilters,
-  applySearch,
-  computeKpis,
+  buildChecklistView,
   getNow: () => Date.now(),
 };
 
 export const DashboardViewModelContext = createContext<DashboardViewModelContextType>(defaultDeps);
 
 export function useDashboardViewModel(): DashboardViewModel {
-  const { useChecklistData: useData, useAppState: useState, applyFilters: filter, applySearch: search, computeKpis: kpis, getNow } =
+  const { useChecklistData: useData, useAppState: useState, buildChecklistView: buildView, getNow } =
     useContext(DashboardViewModelContext);
 
   const { checklists, isLoading, isError, lastUpdatedAt, refresh } = useData();
   const { state } = useState();
-  const now = getNow();
+  const now = lastUpdatedAt ?? getNow();
 
-  const derivedKpis = useMemo((): Kpis | null => {
+  const view = useMemo(() => {
     if (isLoading || isError) {
       return null;
     }
-    const filtered = filter(checklists, state.filters, now);
-    const searched = search(filtered, state.search);
-    return kpis(searched, now);
-  }, [checklists, state.filters, state.search, isLoading, isError, now, filter, search, kpis]);
+    return buildView(checklists, state.filters, state.search, state.sort, now);
+  }, [checklists, state.filters, state.search, state.sort, isLoading, isError, now, buildView]);
 
   return {
     isLoading,
     isError,
-    kpis: derivedKpis,
+    checklistKpis: view?.checklistKpis ?? null,
+    itemKpis: view?.itemKpis ?? null,
     lastUpdatedAt,
     refresh,
   };

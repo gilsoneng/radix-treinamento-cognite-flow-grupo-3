@@ -9,7 +9,7 @@ import {
 } from '@cognite/aura/components';
 import { IconArrowDown, IconArrowUp } from '@tabler/icons-react';
 
-import type { SortDir, SortKey } from '../_contracts';
+import type { SortDir, SortKey } from '../../domain';
 
 const SORT_KEY_LABELS: Record<SortKey, string> = {
   prazo: 'Prazo',

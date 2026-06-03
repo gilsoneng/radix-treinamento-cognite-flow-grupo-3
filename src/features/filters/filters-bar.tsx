@@ -4,6 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -16,7 +17,7 @@ import {
 } from '@cognite/aura/components';
 import { IconAlertTriangle, IconFilter } from '@tabler/icons-react';
 
-import type { Period } from '../_contracts';
+import type { Period } from '../../domain';
 
 import { SearchBox } from './search-box';
 import { SortControl } from './sort-control';
@@ -43,17 +44,19 @@ export function FiltersBar() {
             Status{filterCountLabel(filters.status.length)}
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>Status</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {vm.statusOptions.map((opt) => (
-              <DropdownMenuCheckboxItem
-                key={opt.value}
-                checked={filters.status.includes(opt.value)}
-                onCheckedChange={() => vm.toggleStatusFilter(opt.value)}
-              >
-                {opt.label}
-              </DropdownMenuCheckboxItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {vm.statusOptions.map((opt) => (
+                <DropdownMenuCheckboxItem
+                  key={opt.value}
+                  checked={filters.status.includes(opt.value)}
+                  onCheckedChange={() => vm.toggleStatusFilter(opt.value)}
+                >
+                  {opt.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -72,17 +75,19 @@ export function FiltersBar() {
             Prioridade{filterCountLabel(filters.priority.length)}
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>Prioridade</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {vm.priorityOptions.map((opt) => (
-              <DropdownMenuCheckboxItem
-                key={opt.value}
-                checked={filters.priority.includes(opt.value)}
-                onCheckedChange={() => vm.togglePriorityFilter(opt.value)}
-              >
-                {opt.label}
-              </DropdownMenuCheckboxItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Prioridade</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {vm.priorityOptions.map((opt) => (
+                <DropdownMenuCheckboxItem
+                  key={opt.value}
+                  checked={filters.priority.includes(opt.value)}
+                  onCheckedChange={() => vm.togglePriorityFilter(opt.value)}
+                >
+                  {opt.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -91,21 +96,23 @@ export function FiltersBar() {
             Área{filterCountLabel(filters.area.length)}
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>Área / ativo</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {vm.availableAreas.length === 0 ? (
-              <DropdownMenuLabel>Nenhuma área disponível</DropdownMenuLabel>
-            ) : (
-              vm.availableAreas.map((area) => (
-                <DropdownMenuCheckboxItem
-                  key={area}
-                  checked={filters.area.includes(area)}
-                  onCheckedChange={() => vm.toggleAreaFilter(area)}
-                >
-                  {area}
-                </DropdownMenuCheckboxItem>
-              ))
-            )}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Área / ativo</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {vm.availableAreas.length === 0 ? (
+                <DropdownMenuLabel>Nenhuma área disponível</DropdownMenuLabel>
+              ) : (
+                vm.availableAreas.map((area) => (
+                  <DropdownMenuCheckboxItem
+                    key={area}
+                    checked={filters.area.includes(area)}
+                    onCheckedChange={() => vm.toggleAreaFilter(area)}
+                  >
+                    {area}
+                  </DropdownMenuCheckboxItem>
+                ))
+              )}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 

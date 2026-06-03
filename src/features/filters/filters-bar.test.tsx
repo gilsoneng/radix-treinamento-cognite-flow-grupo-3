@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ComponentType, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { AppStateActions, ChecklistDataSource } from '../_contracts';
-import { DEFAULT_STATE } from '../_contracts';
+import { makeChecklist } from '../../__mocks__/checklist';
+import { DEFAULT_STATE } from '../../platform';
+import type { AppStateContextValue , ChecklistDataSource } from '../../platform';
+
 
 import { FiltersBar } from './filters-bar';
 import {
@@ -12,11 +14,11 @@ import {
   type FiltersViewModelContextType,
 } from './use-filters-view-model';
 
-function makeContext(): FiltersViewModelContextType & { appActions: AppStateActions } {
+function makeContext(): FiltersViewModelContextType & { appActions: AppStateContextValue } {
   const setFilters = vi.fn();
   const setSort = vi.fn();
   const setSearch = vi.fn();
-  const appActions: AppStateActions = {
+  const appActions: AppStateContextValue = {
     state: DEFAULT_STATE,
     setActiveView: vi.fn(),
     setFilters,
@@ -27,20 +29,7 @@ function makeContext(): FiltersViewModelContextType & { appActions: AppStateActi
   };
   const data: ChecklistDataSource = {
     checklists: [
-      {
-        externalId: 'c1',
-        title: 'Ronda',
-        description: null,
-        status: 'Open',
-        type: null,
-        assignedTo: [],
-        labels: [],
-        visibility: null,
-        isArchived: false,
-        startTime: null,
-        endTime: null,
-        sourceId: null,
-        source: null,
+      makeChecklist({
         rootLocation: {
           externalId: 'a1',
           title: 'Área X',
@@ -53,14 +42,10 @@ function makeContext(): FiltersViewModelContextType & { appActions: AppStateActi
           createdTime: 0,
           lastUpdatedTime: 0,
         },
-        createdBy: null,
-        updatedBy: null,
-        items: [],
-        createdTime: 0,
-        lastUpdatedTime: 0,
-      },
+      }),
     ],
     isLoading: false,
+    isRefreshing: false,
     isError: false,
     error: null,
     lastUpdatedAt: null,
@@ -70,6 +55,7 @@ function makeContext(): FiltersViewModelContextType & { appActions: AppStateActi
     appActions,
     useAppState: vi.fn(() => appActions),
     useChecklistData: vi.fn(() => data),
+    deriveArea: vi.fn((c) => c.rootLocation?.title ?? null),
   };
 }
 
@@ -100,6 +86,45 @@ describe(FiltersBar.name, () => {
     expect(ctx.appActions.setFilters).toHaveBeenCalledWith({
       ...DEFAULT_STATE.filters,
       onlyOverdue: true,
+    });
+  });
+
+  it('should open the status dropdown and toggle a status filter', () => {
+    const ctx = makeContext();
+    renderBar(ctx);
+
+    fireEvent.click(screen.getByRole('button', { name: /Status/ }));
+    fireEvent.click(screen.getByText('Atrasado'));
+
+    expect(ctx.appActions.setFilters).toHaveBeenCalledWith({
+      ...DEFAULT_STATE.filters,
+      status: ['atrasado'],
+    });
+  });
+
+  it('should open the priority dropdown and toggle a priority filter', () => {
+    const ctx = makeContext();
+    renderBar(ctx);
+
+    fireEvent.click(screen.getByRole('button', { name: /Prioridade/ }));
+    fireEvent.click(screen.getByText('Alta'));
+
+    expect(ctx.appActions.setFilters).toHaveBeenCalledWith({
+      ...DEFAULT_STATE.filters,
+      priority: ['alta'],
+    });
+  });
+
+  it('should open the area dropdown and toggle an area filter', () => {
+    const ctx = makeContext();
+    renderBar(ctx);
+
+    fireEvent.click(screen.getByRole('button', { name: /Área/ }));
+    fireEvent.click(screen.getByText('Área X'));
+
+    expect(ctx.appActions.setFilters).toHaveBeenCalledWith({
+      ...DEFAULT_STATE.filters,
+      area: ['Área X'],
     });
   });
 

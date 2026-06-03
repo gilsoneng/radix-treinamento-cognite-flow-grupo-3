@@ -1,16 +1,8 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import type { Checklist } from '../../types/apm';
-import {
-  useAppState,
-  useChecklistData,
-  type Filters,
-  type Period,
-  type Priority,
-  type SortDir,
-  type SortKey,
-  type StatusBucket,
-} from '../_contracts';
+import { deriveArea } from '../../domain';
+import type { Filters, Period, Priority, SortDir, SortKey, StatusBucket } from '../../domain';
+import { useAppState, useChecklistData } from '../../platform';
 
 export interface FilterOption<T extends string> {
   value: T;
@@ -38,6 +30,7 @@ export interface FiltersViewModel {
 export type FiltersViewModelContextType = {
   useAppState: typeof useAppState;
   useChecklistData: typeof useChecklistData;
+  deriveArea: typeof deriveArea;
 };
 
 const STATUS_OPTIONS: FilterOption<StatusBucket>[] = [
@@ -63,34 +56,31 @@ const PERIOD_OPTIONS: FilterOption<Period>[] = [
 const defaultDeps: FiltersViewModelContextType = {
   useAppState,
   useChecklistData,
+  deriveArea,
 };
 
 export const FiltersViewModelContext = createContext<FiltersViewModelContextType>(defaultDeps);
-
-/** TODO(DEV2): replace with deriveArea when domain module lands. */
-function deriveAreaFromChecklist(c: Checklist): string | null {
-  return c.rootLocation?.title ?? null;
-}
 
 function toggleInList<T extends string>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
 export function useFiltersViewModel(): FiltersViewModel {
-  const { useAppState: useState, useChecklistData: useData } = useContext(FiltersViewModelContext);
+  const { useAppState: useState, useChecklistData: useData, deriveArea: resolveArea } =
+    useContext(FiltersViewModelContext);
   const { state, setFilters: setFiltersHost, setSort: setSortHost, setSearch: setSearchHost } = useState();
   const { checklists } = useData();
 
   const availableAreas = useMemo(() => {
     const areas = new Set<string>();
     for (const c of checklists) {
-      const area = deriveAreaFromChecklist(c);
+      const area = resolveArea(c);
       if (area !== null && area.length > 0) {
         areas.add(area);
       }
     }
     return [...areas].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [checklists]);
+  }, [checklists, resolveArea]);
 
   const setFilters = useCallback((f: Filters) => setFiltersHost(f), [setFiltersHost]);
 

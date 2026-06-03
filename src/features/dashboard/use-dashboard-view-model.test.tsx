@@ -2,8 +2,12 @@ import { renderHook } from '@testing-library/react';
 import type { ComponentType, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { sampleChecklists } from '../__mocks__/checklists';
-import { DEFAULT_STATE, type AppStateActions, type ChecklistDataSource, type Kpis } from '../_contracts';
+import { DEFAULT_FILTERS } from '../../domain';
+import type { ChecklistItemKpis, ChecklistKpis } from '../../domain';
+import { buildDomainFixtureChecklists } from '../../domain/__fixtures__/checklists';
+import { DEFAULT_STATE } from '../../platform';
+import type { AppStateContextValue , ChecklistDataSource } from '../../platform';
+
 
 import {
   DashboardViewModelContext,
@@ -12,8 +16,9 @@ import {
 } from './use-dashboard-view-model';
 
 const FIXED_NOW = 1_750_000_000_000;
+const sampleChecklists = buildDomainFixtureChecklists();
 
-const mockKpis: Kpis = {
+const mockChecklistKpis: ChecklistKpis = {
   openCount: 2,
   overdueCount: 1,
   slaOnTimePercent: 75,
@@ -30,10 +35,18 @@ const mockKpis: Kpis = {
   ],
 };
 
+const mockItemKpis: ChecklistItemKpis = {
+  totalItems: 5,
+  openItems: 3,
+  overdueItems: 1,
+  byItemStatus: { pendente: 2, ok: 3 },
+};
+
 function makeDataSource(overrides: Partial<ChecklistDataSource> = {}): ChecklistDataSource {
   return {
     checklists: sampleChecklists,
     isLoading: false,
+    isRefreshing: false,
     isError: false,
     error: null,
     lastUpdatedAt: FIXED_NOW,
@@ -42,7 +55,7 @@ function makeDataSource(overrides: Partial<ChecklistDataSource> = {}): Checklist
   };
 }
 
-function makeAppState(overrides: Partial<AppStateActions> = {}): AppStateActions {
+function makeAppState(overrides: Partial<AppStateContextValue> = {}): AppStateContextValue {
   return {
     state: DEFAULT_STATE,
     setActiveView: vi.fn(),
@@ -63,9 +76,11 @@ describe(useDashboardViewModel.name, () => {
     mockContext = {
       useChecklistData: vi.fn(() => makeDataSource()),
       useAppState: vi.fn(() => makeAppState()),
-      applyFilters: vi.fn((cs: typeof sampleChecklists) => cs),
-      applySearch: vi.fn((cs: typeof sampleChecklists) => cs),
-      computeKpis: vi.fn(() => mockKpis),
+      buildChecklistView: vi.fn(() => ({
+        rows: sampleChecklists,
+        checklistKpis: mockChecklistKpis,
+        itemKpis: mockItemKpis,
+      })),
       getNow: () => FIXED_NOW,
     };
     wrapper = ({ children }) => (
@@ -81,7 +96,7 @@ describe(useDashboardViewModel.name, () => {
     const { result } = renderHook(() => useDashboardViewModel(), { wrapper });
 
     expect(result.current.isLoading).toBe(true);
-    expect(result.current.kpis).toBeNull();
+    expect(result.current.checklistKpis).toBeNull();
   });
 
   it('should expose error state when data fetch fails', () => {
@@ -92,48 +107,52 @@ describe(useDashboardViewModel.name, () => {
     const { result } = renderHook(() => useDashboardViewModel(), { wrapper });
 
     expect(result.current.isError).toBe(true);
-    expect(result.current.kpis).toBeNull();
+    expect(result.current.checklistKpis).toBeNull();
   });
 
-  it('should compute KPIs from filtered and searched checklists on success', () => {
+  it('should compute KPIs via buildChecklistView on success', () => {
     const { result } = renderHook(() => useDashboardViewModel(), { wrapper });
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.isError).toBe(false);
-    expect(result.current.kpis).toEqual(mockKpis);
+    expect(result.current.checklistKpis).toEqual(mockChecklistKpis);
+    expect(result.current.itemKpis).toEqual(mockItemKpis);
     expect(result.current.lastUpdatedAt).toBe(FIXED_NOW);
-    expect(mockContext.applyFilters).toHaveBeenCalledWith(
+    expect(mockContext.buildChecklistView).toHaveBeenCalledWith(
       sampleChecklists,
       DEFAULT_STATE.filters,
+      DEFAULT_STATE.search,
+      DEFAULT_STATE.sort,
       FIXED_NOW
     );
-    expect(mockContext.applySearch).toHaveBeenCalledWith(sampleChecklists, DEFAULT_STATE.search);
-    expect(mockContext.computeKpis).toHaveBeenCalledWith(sampleChecklists, FIXED_NOW);
   });
 
   it('should recompute KPIs when filters change', () => {
-    const filteredOnlyOverdue = [sampleChecklists[1]];
-    const overdueKpis: Kpis = { ...mockKpis, openCount: 0, overdueCount: 1 };
-    vi.mocked(mockContext.applyFilters).mockReturnValue(filteredOnlyOverdue);
-    vi.mocked(mockContext.computeKpis).mockReturnValue(overdueKpis);
+    const overdueKpis: ChecklistKpis = { ...mockChecklistKpis, openCount: 0, overdueCount: 1 };
+    vi.mocked(mockContext.buildChecklistView).mockReturnValue({
+      rows: [sampleChecklists[0]],
+      checklistKpis: overdueKpis,
+      itemKpis: mockItemKpis,
+    });
     vi.mocked(mockContext.useAppState).mockReturnValue(
       makeAppState({
         state: {
           ...DEFAULT_STATE,
-          filters: { ...DEFAULT_STATE.filters, onlyOverdue: true, area: ['Área B'] },
+          filters: { ...DEFAULT_FILTERS, onlyOverdue: true },
         },
       })
     );
 
     const { result } = renderHook(() => useDashboardViewModel(), { wrapper });
 
-    expect(result.current.kpis?.overdueCount).toBe(1);
-    expect(mockContext.applyFilters).toHaveBeenCalledWith(
+    expect(result.current.checklistKpis?.overdueCount).toBe(1);
+    expect(mockContext.buildChecklistView).toHaveBeenCalledWith(
       sampleChecklists,
-      expect.objectContaining({ onlyOverdue: true, area: ['Área B'] }),
+      expect.objectContaining({ onlyOverdue: true }),
+      DEFAULT_STATE.search,
+      DEFAULT_STATE.sort,
       FIXED_NOW
     );
-    expect(mockContext.computeKpis).toHaveBeenCalledWith(filteredOnlyOverdue, FIXED_NOW);
   });
 
   it('should delegate refresh to checklist data source', () => {

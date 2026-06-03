@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, Badge, Loader, Progress } from '@cognite/aura/components';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { IconAlertTriangle, IconClipboardList } from '@tabler/icons-react';
 
-import type { Kpis, Priority, StatusBucket } from '../_contracts';
+import type { ChecklistKpis, Priority, StatusBucket } from '../../domain';
 
 import { KpiCard } from './kpi-card';
 import { useDashboardViewModel } from './use-dashboard-view-model';
@@ -19,7 +19,7 @@ const PRIORITY_LABELS: Record<Priority, string> = {
   baixa: 'Baixa',
 };
 
-function hasAnyChecklist(kpis: Kpis): boolean {
+function hasAnyChecklist(kpis: ChecklistKpis): boolean {
   const statusTotal = Object.values(kpis.byStatus).reduce((sum, n) => sum + n, 0);
   return statusTotal > 0 || kpis.openCount > 0 || kpis.overdueCount > 0;
 }
@@ -37,7 +37,7 @@ function DistributionBadges({
   }
   return (
     <section aria-labelledby={`dist-${title}`} className="flex flex-col gap-2">
-      <h3 id={`dist-${title}`} className="text-sm font-medium text-muted-foreground">
+      <h3 id={`dist-${title}`} className="text-sm text-muted-foreground">
         {title}
       </h3>
       <ul className="flex flex-wrap gap-2">
@@ -54,7 +54,7 @@ function DistributionBadges({
 }
 
 export function Dashboard() {
-  const { isLoading, isError, kpis } = useDashboardViewModel();
+  const { isLoading, isError, checklistKpis, itemKpis } = useDashboardViewModel();
 
   if (isLoading) {
     return (
@@ -77,53 +77,85 @@ export function Dashboard() {
     );
   }
 
-  if (kpis === null || !hasAnyChecklist(kpis)) {
+  if (checklistKpis === null || !hasAnyChecklist(checklistKpis)) {
     return (
       <Alert variant="secondary">
-        <AlertDescription>Nenhuma ronda no período selecionado. Ajuste os filtros ou aguarde novos dados.</AlertDescription>
+        <AlertDescription>Nenhuma ronda no recorte atual. Ajuste os filtros ou aguarde novos dados.</AlertDescription>
       </Alert>
     );
   }
 
   return (
-    <section aria-label="Dashboard de KPIs" className="flex flex-col gap-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <KpiCard title="Abertos" value={kpis.openCount} description="Rondas em aberto ou em andamento" />
-        <KpiCard
-          title="Atrasados"
-          value={kpis.overdueCount}
-          variant="overdue"
-          emphasisLabel="Requer atenção"
-          icon={<IconAlertTriangle aria-hidden className="size-4" />}
-          description="Prazo vencido e não concluídas"
-        />
-        <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
-          <h3 className="text-base font-medium">% no prazo (SLA)</h3>
-          <p className="text-3xl font-semibold tabular-nums">{kpis.slaOnTimePercent}%</p>
-          <Progress value={kpis.slaOnTimePercent} aria-label={`SLA ${kpis.slaOnTimePercent}% no prazo`} />
+    <section aria-label="Dashboard de KPIs" className="flex flex-col gap-8">
+      <div>
+        <h2 className="mb-4 text-lg">Rondas</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <KpiCard title="Abertos" value={checklistKpis.openCount} description="Rondas em aberto ou em andamento" />
+          <KpiCard
+            title="Atrasados"
+            value={checklistKpis.overdueCount}
+            variant="overdue"
+            emphasisLabel="Requer atenção"
+            icon={<IconAlertTriangle aria-hidden className="size-4" />}
+            description="Prazo vencido e não concluídas"
+          />
+          <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
+            <h3>% no prazo (SLA)</h3>
+            <p className="text-3xl tabular-nums">{checklistKpis.slaOnTimePercent}%</p>
+            <Progress
+              value={checklistKpis.slaOnTimePercent}
+              aria-label={`SLA ${checklistKpis.slaOnTimePercent}% no prazo`}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-3">
+          <DistributionBadges
+            title="Por status"
+            entries={(Object.keys(STATUS_LABELS) as StatusBucket[]).map((key) => ({
+              label: STATUS_LABELS[key],
+              count: checklistKpis.byStatus[key],
+            }))}
+          />
+          <DistributionBadges
+            title="Por prioridade"
+            entries={(Object.keys(PRIORITY_LABELS) as Priority[]).map((key) => ({
+              label: PRIORITY_LABELS[key],
+              count: checklistKpis.byPriority[key],
+            }))}
+          />
+          <DistributionBadges
+            title="Por área"
+            entries={checklistKpis.byArea.map((a) => ({ label: a.area, count: a.count }))}
+          />
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <DistributionBadges
-          title="Por status"
-          entries={(Object.keys(STATUS_LABELS) as StatusBucket[]).map((key) => ({
-            label: STATUS_LABELS[key],
-            count: kpis.byStatus[key],
-          }))}
-        />
-        <DistributionBadges
-          title="Por prioridade"
-          entries={(Object.keys(PRIORITY_LABELS) as Priority[]).map((key) => ({
-            label: PRIORITY_LABELS[key],
-            count: kpis.byPriority[key],
-          }))}
-        />
-        <DistributionBadges
-          title="Por área"
-          entries={kpis.byArea.map((a) => ({ label: a.area, count: a.count }))}
-        />
-      </div>
+      {itemKpis !== null && itemKpis.totalItems > 0 ? (
+        <div>
+          <h2 className="mb-4 flex items-center gap-2 text-lg">
+            <IconClipboardList aria-hidden className="size-5" />
+            Tarefas das rondas
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <KpiCard title="Total de tarefas" value={itemKpis.totalItems} />
+            <KpiCard title="Tarefas abertas" value={itemKpis.openItems} />
+            <KpiCard
+              title="Tarefas atrasadas"
+              value={itemKpis.overdueItems}
+              variant="overdue"
+              emphasisLabel="Atenção"
+              icon={<IconAlertTriangle aria-hidden className="size-4" />}
+            />
+          </div>
+          <div className="mt-4">
+            <DistributionBadges
+              title="Por status da tarefa"
+              entries={Object.entries(itemKpis.byItemStatus).map(([label, count]) => ({ label, count }))}
+            />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

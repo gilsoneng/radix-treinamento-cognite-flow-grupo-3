@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react';
 import type { ComponentType, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Kpis } from '../_contracts';
+import type { ChecklistItemKpis, ChecklistKpis } from '../../domain';
+import { DEFAULT_STATE } from '../../platform';
 
 import { Dashboard } from './dashboard';
 import {
@@ -10,7 +11,7 @@ import {
   type DashboardViewModelContextType,
 } from './use-dashboard-view-model';
 
-const mockKpis: Kpis = {
+const mockChecklistKpis: ChecklistKpis = {
   openCount: 5,
   overdueCount: 2,
   slaOnTimePercent: 80,
@@ -27,31 +28,32 @@ const mockKpis: Kpis = {
   ],
 };
 
-function makeVmContext(overrides: Partial<ReturnType<DashboardViewModelContextType['useChecklistData']>> & {
-  kpis?: Kpis | null;
+const mockItemKpis: ChecklistItemKpis = {
+  totalItems: 10,
+  openItems: 6,
+  overdueItems: 2,
+  byItemStatus: { pendente: 4, ok: 6 },
+};
+
+function makeVmContext(overrides: {
   isLoading?: boolean;
   isError?: boolean;
+  checklistKpis?: ChecklistKpis | null;
+  itemKpis?: ChecklistItemKpis | null;
 }): DashboardViewModelContextType {
-  const { kpis = mockKpis, isLoading = false, isError = false, ...dataOverrides } = overrides;
+  const { isLoading = false, isError = false, checklistKpis = mockChecklistKpis, itemKpis = mockItemKpis } = overrides;
   return {
     useChecklistData: vi.fn(() => ({
       checklists: [],
       isLoading,
+      isRefreshing: false,
       isError,
       error: isError ? new Error('fail') : null,
       lastUpdatedAt: 1_750_000_000_000,
       refresh: vi.fn(),
-      ...dataOverrides,
     })),
     useAppState: vi.fn(() => ({
-      state: {
-        activeView: 'dashboard',
-        filters: { status: [], onlyOverdue: false, priority: [], area: [], period: '30d' },
-        sort: { key: 'prazo', dir: 'asc' },
-        search: '',
-        selectedChecklistId: null,
-        detailOpen: false,
-      },
+      state: DEFAULT_STATE,
       setActiveView: vi.fn(),
       setFilters: vi.fn(),
       setSort: vi.fn(),
@@ -59,9 +61,11 @@ function makeVmContext(overrides: Partial<ReturnType<DashboardViewModelContextTy
       selectChecklist: vi.fn(),
       closeDetail: vi.fn(),
     })),
-    applyFilters: vi.fn((cs) => cs),
-    applySearch: vi.fn((cs) => cs),
-    computeKpis: vi.fn(() => kpis ?? mockKpis),
+    buildChecklistView: vi.fn(() => ({
+      rows: [],
+      checklistKpis: checklistKpis ?? mockChecklistKpis,
+      itemKpis: itemKpis ?? mockItemKpis,
+    })),
     getNow: () => 1_750_000_000_000,
   };
 }
@@ -75,17 +79,17 @@ function renderWithContext(ctx: DashboardViewModelContextType) {
 
 describe(Dashboard.name, () => {
   it('should render loading state', () => {
-    renderWithContext(makeVmContext({ isLoading: true, kpis: null }));
+    renderWithContext(makeVmContext({ isLoading: true, checklistKpis: null, itemKpis: null }));
     expect(screen.getByLabelText('Carregando indicadores')).toBeInTheDocument();
   });
 
   it('should render error state', () => {
-    renderWithContext(makeVmContext({ isError: true, kpis: null }));
+    renderWithContext(makeVmContext({ isError: true, checklistKpis: null, itemKpis: null }));
     expect(screen.getByText(/Não foi possível carregar os indicadores/i)).toBeInTheDocument();
   });
 
   it('should render empty state when KPIs show zero checklists', () => {
-    const emptyKpis: Kpis = {
+    const emptyKpis: ChecklistKpis = {
       openCount: 0,
       overdueCount: 0,
       slaOnTimePercent: 0,
@@ -93,19 +97,18 @@ describe(Dashboard.name, () => {
       byPriority: { alta: 0, media: 0, baixa: 0 },
       byArea: [],
     };
-    renderWithContext(makeVmContext({ kpis: emptyKpis }));
-    expect(screen.getByText(/Nenhuma ronda no período/i)).toBeInTheDocument();
+    renderWithContext(makeVmContext({ checklistKpis: emptyKpis, itemKpis: { totalItems: 0, openItems: 0, overdueItems: 0, byItemStatus: {} } }));
+    expect(screen.getByText(/Nenhuma ronda no recorte atual/i)).toBeInTheDocument();
   });
 
-  it('should render KPI cards with overdue emphasis', () => {
+  it('should render checklist and item KPI cards with overdue emphasis', () => {
     renderWithContext(makeVmContext({}));
     expect(screen.getByRole('status', { name: 'Abertos' })).toHaveTextContent('5');
     expect(screen.getByRole('status', { name: 'Atrasados' })).toHaveTextContent('2');
     expect(screen.getByText('Requer atenção')).toBeInTheDocument();
-    expect(screen.getByText('% no prazo (SLA)')).toBeInTheDocument();
     expect(screen.getByText('80%')).toBeInTheDocument();
-    expect(screen.getByText('Por status')).toBeInTheDocument();
-    expect(screen.getByText('Por prioridade')).toBeInTheDocument();
-    expect(screen.getByText('Por área')).toBeInTheDocument();
+    expect(screen.getByText('Rondas')).toBeInTheDocument();
+    expect(screen.getByText('Tarefas das rondas')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Tarefas atrasadas' })).toHaveTextContent('2');
   });
 });

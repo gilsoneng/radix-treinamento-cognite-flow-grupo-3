@@ -9,11 +9,20 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { devServerHintsPlugin } from './scripts/vite-dev-hints-plugin.mjs';
+
 export default defineConfig({
   base: './',
   // manifestCspPlugin() must stay first — its middleware sets the
   // Content-Security-Policy header before any HTML response is sent.
-  plugins: [manifestCspPlugin(), react(), mkcertPlugin(), fusionOpenPlugin(), tailwindcss()],
+  plugins: [
+    manifestCspPlugin(),
+    react(),
+    mkcertPlugin(),
+    fusionOpenPlugin(),
+    devServerHintsPlugin(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -21,6 +30,8 @@ export default defineConfig({
   },
   server: {
     port: 3001,
+    strictPort: true,
+    host: true,
   },
   worker: {
     format: 'es',
